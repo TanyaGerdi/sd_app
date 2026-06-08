@@ -14,6 +14,7 @@ import 'package:sd_institute/screens/fees_screen.dart';
 import 'package:sd_institute/screens/attendance_screen.dart';
 import 'package:sd_institute/screens/teacher_attendance_screen.dart';
 import 'package:sd_institute/screens/teacher_homework_screen.dart';
+import 'package:sd_institute/screens/student_homework_screen.dart';
 import 'package:sd_institute/theme/app_colors.dart';
 import 'package:sd_institute/theme/theme_provider.dart';
 import 'package:sd_institute/widgets/bottom_nav_bar.dart';
@@ -749,6 +750,19 @@ class DrawerWrapperState extends State<DrawerWrapper>
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const AttendanceScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 6),
+                _buildStudentLink(
+                  icon: Icons.assignment_rounded,
+                  title: loc.get('my_homeworks'),
+                  color: const Color(0xFF9F7AEA),
+                  onTap: () {
+                    toggleDrawer();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const StudentHomeworkScreen()),
                     );
                   },
                 ),

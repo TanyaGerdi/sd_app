@@ -5,6 +5,8 @@ import 'package:sd_institute/services/auth_service.dart';
 import 'package:sd_institute/utils/app_localizations.dart';
 import 'package:sd_institute/theme/app_colors.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TeacherHomeworkScreen extends StatefulWidget {
   const TeacherHomeworkScreen({super.key});
@@ -174,13 +176,9 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
   }
 
   Widget _buildHomeworkCard(dynamic hw, bool isDark, AppLocalizations loc) {
-    final isRtl = loc.get('yes') == 'بەڵێ'; // Basic RTL detect
-    final title = isRtl
-        ? (hw['title_ku'] ?? hw['title_en'] ?? '')
-        : (hw['title_en'] ?? hw['title_ku'] ?? '');
-    final desc = isRtl
-        ? (hw['description_ku'] ?? hw['description_en'] ?? '')
-        : (hw['description_en'] ?? hw['description_ku'] ?? '');
+    final title = hw['title'] ?? hw['title_ku'] ?? hw['title_en'] ?? '';
+    final desc = hw['description'] ?? hw['description_ku'] ?? hw['description_en'] ?? '';
+    final filePath = hw['file_path'] as String?;
 
     final dueDateStr = hw['due_date'] as String?;
     DateTime? dueDate;
@@ -280,6 +278,43 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                     height: 1.4,
                   ),
                 ),
+                if (filePath != null && filePath.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () async {
+                      final uri = Uri.parse(filePath);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark ? Colors.white10 : Colors.black12,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.insert_drive_file_rounded, color: AppColors.primary, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'View Attachment',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -326,13 +361,25 @@ class _AddHomeworkSheet extends StatefulWidget {
 
 class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _titleKuCtrl = TextEditingController();
-  final _titleEnCtrl = TextEditingController();
-  final _descKuCtrl = TextEditingController();
-  final _descEnCtrl = TextEditingController();
+  final _titleCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
+  PlatformFile? _selectedFile;
 
   DateTime _dueDate = DateTime.now().add(const Duration(days: 7));
   bool _submitting = false;
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.pickFiles();
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedFile = result.files.single;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking file: $e');
+    }
+  }
 
   Future<void> _selectDueDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -373,20 +420,48 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       final deptId = teacher['department_id'];
       final teacherId = teacher['id'];
 
+      String? uploadedFilePath;
+
+      if (_selectedFile != null && _selectedFile!.path != null) {
+        final filename = '${DateTime.now().millisecondsSinceEpoch}_${_selectedFile!.name}';
+        final uploadResult = await ApiService.upload(
+          '/storage/homeworks',
+          filePath: _selectedFile!.path!,
+          fieldName: 'file',
+          extraFields: {'path': filename},
+        );
+        uploadedFilePath = uploadResult['publicUrl'] ?? uploadResult['path'];
+      }
+
       final dateStr = intl.DateFormat('yyyy-MM-dd').format(_dueDate);
 
       await ApiService.post(
         '/homeworks',
         data: {
-          'title_ku': _titleKuCtrl.text.trim(),
-          'title_en': _titleEnCtrl.text.trim(),
-          'description_ku': _descKuCtrl.text.trim(),
-          'description_en': _descEnCtrl.text.trim(),
+          'title': _titleCtrl.text.trim(),
+          'description': _descCtrl.text.trim(),
           'due_date': dateStr,
+          'file_path': uploadedFilePath,
           'department_id': deptId,
           'teacher_id': teacherId,
         },
       );
+
+      // Create student notification
+      try {
+        await ApiService.post(
+          '/notifications',
+          data: {
+            'title_ku': 'ئەرکی نوێ: ${_titleCtrl.text.trim()}',
+            'title_en': 'New Homework: ${_titleCtrl.text.trim()}',
+            'description_ku': 'ئەرکێکی نوێ بارکراوە بۆ بەشەکەت. کاتی کۆتایی: $dateStr.',
+            'description_en': 'A new homework assignment has been posted. Due: $dateStr.',
+            'target_audience': 'dept_$deptId',
+          },
+        );
+      } catch (e) {
+        debugPrint('Failed to send notification: $e');
+      }
 
       if (!mounted) return;
       HapticFeedback.heavyImpact();
@@ -446,45 +521,80 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
               ),
               const SizedBox(height: 16),
               
-              // Kurdish Title
               _buildField(
-                controller: _titleKuCtrl,
-                label: 'Title (Kurdish)',
+                controller: _titleCtrl,
+                label: 'Title',
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 12),
               
-              // English Title
               _buildField(
-                controller: _titleEnCtrl,
-                label: 'Title (English)',
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 12),
-              
-              // Kurdish Description
-              _buildField(
-                controller: _descKuCtrl,
-                label: 'Description (Kurdish)',
+                controller: _descCtrl,
+                label: 'Description',
                 maxLines: 3,
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 isDark: isDark,
               ),
-              const SizedBox(height: 12),
-              
-              // English Description
-              _buildField(
-                controller: _descEnCtrl,
-                label: 'Description (English)',
-                maxLines: 3,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                isDark: isDark,
+              const SizedBox(height: 16),
+
+              Text(
+                'Attachment File (Optional)',
+                style: TextStyle(
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              const SizedBox(height: 6),
+              _selectedFile == null
+                  ? OutlinedButton.icon(
+                      onPressed: _pickFile,
+                      icon: const Icon(Icons.attach_file_rounded),
+                      label: const Text('Attach File'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.insert_drive_file_rounded, color: AppColors.primary, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _selectedFile!.name,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedFile = null;
+                              });
+                            },
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                          ),
+                        ],
+                      ),
+                    ),
               const SizedBox(height: 18),
               
-              // Due Date Selector Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -518,7 +628,6 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
               ),
               const SizedBox(height: 24),
               
-              // Submit button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

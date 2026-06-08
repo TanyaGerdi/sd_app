@@ -240,6 +240,10 @@ class NotificationService {
         if (audience == null || audience == 'all') return true;
         if (studentId != null && (audience == studentId || audience == 'student_$studentId')) return true;
         if (studentEmail != null && audience == studentEmail) return true;
+        
+        final deptId = AuthService.currentStudent?['department_id']?.toString();
+        if (deptId != null && audience == 'dept_$deptId') return true;
+        
         return false;
       }).toList();
 

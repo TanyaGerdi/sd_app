@@ -115,6 +115,26 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         },
       );
 
+      // Create student notification
+      try {
+        final teacher = AuthService.currentStudent;
+        final deptId = teacher?['department_id'];
+        if (deptId != null) {
+          await ApiService.post(
+            '/notifications',
+            data: {
+              'title_ku': 'تۆمارکردنی ئامادەبوون',
+              'title_en': 'Attendance Recorded',
+              'description_ku': 'ئامادەبوونی ڕێکەوتی $dateStr تۆمارکرا بۆ بەشەکەت.',
+              'description_en': 'Attendance for $dateStr has been recorded for your department.',
+              'target_audience': 'dept_$deptId',
+            },
+          );
+        }
+      } catch (e) {
+        debugPrint('Failed to send notification: $e');
+      }
+
       if (!mounted) return;
       HapticFeedback.heavyImpact();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,20 +270,30 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   ) {
     final ratePercent = (rate * 100).toStringAsFixed(0);
     final dateFormatted = intl.DateFormat('yyyy MMM dd').format(_selectedDate);
+    final themeColor = rate > 0.8 ? const Color(0xFF34C759) : rate > 0.5 ? Colors.orange : Colors.red;
 
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: themeColor.withValues(alpha: 0.08),
+            blurRadius: 25,
+            spreadRadius: 5,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -271,66 +301,119 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                dateFormatted,
-                style: TextStyle(
-                  color: isDark ? Colors.white : const Color(0xFF1E293B),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              Row(
+                children: [
+                  Icon(Icons.calendar_month_rounded, size: 20, color: isDark ? Colors.white70 : Colors.black87),
+                  const SizedBox(width: 8),
+                  Text(
+                    dateFormatted,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF1E293B),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
-              TextButton.icon(
+              ElevatedButton.icon(
                 onPressed: () => _selectDate(context),
-                icon: Icon(Icons.edit_calendar_rounded, size: 18, color: AppColors.primary),
-                label: Text(
+                icon: const Icon(Icons.edit_calendar_rounded, size: 16, color: Colors.white),
+                label: const Text(
                   'Change Date',
-                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ],
           ),
-          const Divider(height: 24, thickness: 1, color: Colors.white10),
+          const SizedBox(height: 16),
+          Container(
+            height: 1,
+            color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          ),
+          const SizedBox(height: 20),
           
           // Stats Row with beautiful radial circular indicator
           Row(
             children: [
-              // Circular progress
+              // Large Circular Progress
               SizedBox(
-                width: 80,
-                height: 80,
+                width: 120,
+                height: 120,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      value: rate,
-                      strokeWidth: 8,
-                      backgroundColor: isDark ? Colors.white10 : Colors.black12,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        rate > 0.8 ? const Color(0xFF34C759) : rate > 0.5 ? Colors.orange : Colors.red,
+                    // Outer glow container
+                    Container(
+                      width: 104,
+                      height: 104,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                        boxShadow: [
+                          BoxShadow(
+                            color: themeColor.withValues(alpha: 0.15),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      '$ratePercent%',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    SizedBox(
+                      width: 110,
+                      height: 110,
+                      child: CircularProgressIndicator(
+                        value: rate,
+                        strokeWidth: 12,
+                        backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                        strokeCap: StrokeCap.round,
                       ),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$ratePercent%',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 24,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          'Rate',
+                          style: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 28),
               // Stats Labels
               Expanded(
                 child: Column(
                   children: [
                     _buildStatLine('Total Students', total.toString(), isDark, const Color(0xFF5B8DEF)),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     _buildStatLine('Present', present.toString(), isDark, const Color(0xFF34C759)),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     _buildStatLine('Late', late.toString(), isDark, Colors.orange),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     _buildStatLine('Absent', absent.toString(), isDark, Colors.redAccent),
                   ],
                 ),

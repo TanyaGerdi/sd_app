@@ -20,6 +20,9 @@ import 'package:sd_institute/services/auth_service.dart';
 import 'package:sd_institute/screens/fees_screen.dart';
 import 'package:sd_institute/screens/attendance_screen.dart';
 import 'package:sd_institute/screens/login_screen.dart';
+import 'package:sd_institute/screens/teacher_attendance_screen.dart';
+import 'package:sd_institute/screens/teacher_homework_screen.dart';
+import 'package:sd_institute/screens/student_homework_screen.dart';
 import 'package:sd_institute/services/institute_service.dart';
 import 'package:sd_institute/services/post_service.dart';
 import 'package:sd_institute/services/notification_service.dart';
@@ -415,24 +418,54 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           },
           if (isLoggedIn) ...[
-            {
-              'title': localizations.get('my_fees'),
-              'icon': Icons.account_balance_wallet_rounded,
-              'color': const Color(0xFF34C759),
-              'onTap': () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FeesScreen()),
-              ),
-            },
-            {
-              'title': localizations.get('my_attendance'),
-              'icon': Icons.calendar_month_rounded,
-              'color': const Color(0xFF4FD1C5),
-              'onTap': () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AttendanceScreen()),
-              ),
-            },
+            if (student['is_teacher'] == true) ...[
+              {
+                'title': localizations.get('take_attendance'),
+                'icon': Icons.assignment_turned_in_rounded,
+                'color': const Color(0xFF4FD1C5),
+                'onTap': () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TeacherAttendanceScreen()),
+                ),
+              },
+              {
+                'title': localizations.get('submit_homeworks'),
+                'icon': Icons.menu_book_rounded,
+                'color': const Color(0xFF9F7AEA),
+                'onTap': () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TeacherHomeworkScreen()),
+                ),
+              },
+            ] else ...[
+              {
+                'title': localizations.get('my_fees'),
+                'icon': Icons.account_balance_wallet_rounded,
+                'color': const Color(0xFF34C759),
+                'onTap': () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FeesScreen()),
+                ),
+              },
+              {
+                'title': localizations.get('my_attendance'),
+                'icon': Icons.calendar_month_rounded,
+                'color': const Color(0xFF4FD1C5),
+                'onTap': () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AttendanceScreen()),
+                ),
+              },
+              {
+                'title': localizations.get('my_homeworks'),
+                'icon': Icons.menu_book_rounded,
+                'color': const Color(0xFF9F7AEA),
+                'onTap': () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StudentHomeworkScreen()),
+                ),
+              },
+            ],
             {
               'title': localizations.get('logout'),
               'icon': Icons.logout_rounded,

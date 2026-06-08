@@ -274,7 +274,7 @@ class AppLocalizations {
       'en': 'Teacher',
     },
     'take_attendance': {
-      'ku': 'تۆمارکردنی ئامادەنەبوون',
+      'ku': 'تۆمارکردنی ئامادەبوون',
       'ar': 'تسجيل الحضور والغياب',
       'en': 'Take Attendance',
     },
@@ -289,6 +289,11 @@ class AppLocalizations {
       'ku': 'باری دارایی',
       'ar': 'الرسوم الدراسية',
       'en': 'My Fees',
+    },
+    'my_homeworks': {
+      'ku': 'ئەرکەکان',
+      'ar': 'الواجبات المنزلية',
+      'en': 'My Homeworks',
     },
     'total_fees': {
       'ku': 'کۆی ئەرکی دارایی',
