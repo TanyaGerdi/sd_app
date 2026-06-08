@@ -234,10 +234,21 @@ class NotificationService {
 
       final studentId = AuthService.getStudentId()?.toString();
       final studentEmail = AuthService.currentStudent?['email']?.toString();
+      final isTeacher = AuthService.isTeacher();
 
       final filtered = data.where((item) {
         final audience = item['target_audience']?.toString();
         if (audience == null || audience == 'all') return true;
+        
+        // If logged-in user is a teacher, only show general or teacher-specific ones
+        if (isTeacher) {
+          if (studentEmail != null && audience == studentEmail) return true;
+          if (studentId != null && audience == 'teacher_$studentId') return true;
+          if (audience == 'teachers') return true;
+          return false; // ignore student/dept notifications
+        }
+
+        // If logged-in user is a student
         if (studentId != null && (audience == studentId || audience == 'student_$studentId')) return true;
         if (studentEmail != null && audience == studentEmail) return true;
         

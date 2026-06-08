@@ -77,6 +77,22 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
     );
   }
 
+  void _showEditHomeworkSheet(dynamic hw) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _AddHomeworkSheet(
+          homework: hw,
+          onSuccess: () {
+            _loadHomeworks();
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -250,22 +266,34 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isOverdue
-                            ? Colors.red.withValues(alpha: 0.1)
-                            : const Color(0xFF34C759).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        isOverdue ? 'Overdue' : 'Active',
-                        style: TextStyle(
-                          color: isOverdue ? Colors.red : const Color(0xFF34C759),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isOverdue
+                                ? Colors.red.withValues(alpha: 0.1)
+                                : const Color(0xFF34C759).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            isOverdue ? 'Overdue' : 'Active',
+                            style: TextStyle(
+                              color: isOverdue ? Colors.red : const Color(0xFF34C759),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.blueAccent),
+                          onPressed: () => _showEditHomeworkSheet(hw),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -353,7 +381,8 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
 
 class _AddHomeworkSheet extends StatefulWidget {
   final VoidCallback onSuccess;
-  const _AddHomeworkSheet({required this.onSuccess});
+  final dynamic homework;
+  const _AddHomeworkSheet({required this.onSuccess, this.homework});
 
   @override
   State<_AddHomeworkSheet> createState() => _AddHomeworkSheetState();
@@ -364,9 +393,26 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   PlatformFile? _selectedFile;
+  String? _existingFilePath;
 
   DateTime _dueDate = DateTime.now().add(const Duration(days: 7));
   bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.homework != null) {
+      _titleCtrl.text = widget.homework['title'] ?? widget.homework['title_ku'] ?? widget.homework['title_en'] ?? '';
+      _descCtrl.text = widget.homework['description'] ?? widget.homework['description_ku'] ?? widget.homework['description_en'] ?? '';
+      final dueDateStr = widget.homework['due_date'] as String?;
+      if (dueDateStr != null) {
+        try {
+          _dueDate = DateTime.parse(dueDateStr);
+        } catch (_) {}
+      }
+      _existingFilePath = widget.homework['file_path'] as String?;
+    }
+  }
 
   Future<void> _pickFile() async {
     try {
@@ -420,7 +466,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       final deptId = teacher['department_id'];
       final teacherId = teacher['id'];
 
-      String? uploadedFilePath;
+      String? uploadedFilePath = _existingFilePath;
 
       if (_selectedFile != null && _selectedFile!.path != null) {
         final filename = '${DateTime.now().millisecondsSinceEpoch}_${_selectedFile!.name}';
@@ -435,32 +481,63 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
 
       final dateStr = intl.DateFormat('yyyy-MM-dd').format(_dueDate);
 
-      await ApiService.post(
-        '/homeworks',
-        data: {
-          'title': _titleCtrl.text.trim(),
-          'description': _descCtrl.text.trim(),
-          'due_date': dateStr,
-          'file_path': uploadedFilePath,
-          'department_id': deptId,
-          'teacher_id': teacherId,
-        },
-      );
-
-      // Create student notification
-      try {
+      if (widget.homework == null) {
         await ApiService.post(
-          '/notifications',
+          '/homeworks',
           data: {
-            'title_ku': 'ئەرکی نوێ: ${_titleCtrl.text.trim()}',
-            'title_en': 'New Homework: ${_titleCtrl.text.trim()}',
-            'description_ku': 'ئەرکێکی نوێ بارکراوە بۆ بەشەکەت. کاتی کۆتایی: $dateStr.',
-            'description_en': 'A new homework assignment has been posted. Due: $dateStr.',
-            'target_audience': 'dept_$deptId',
+            'title': _titleCtrl.text.trim(),
+            'description': _descCtrl.text.trim(),
+            'due_date': dateStr,
+            'file_path': uploadedFilePath,
+            'department_id': deptId,
+            'teacher_id': teacherId,
           },
         );
-      } catch (e) {
-        debugPrint('Failed to send notification: $e');
+
+        // Create student notification
+        try {
+          await ApiService.post(
+            '/notifications',
+            data: {
+              'title_ku': 'ئەرکی نوێ: ${_titleCtrl.text.trim()}',
+              'title_en': 'New Homework: ${_titleCtrl.text.trim()}',
+              'description_ku': 'ئەرکێکی نوێ بارکراوە بۆ بەشەکەت. کاتی کۆتایی: $dateStr.',
+              'description_en': 'A new homework assignment has been posted. Due: $dateStr.',
+              'target_audience': 'dept_$deptId',
+            },
+          );
+        } catch (e) {
+          debugPrint('Failed to send notification: $e');
+        }
+      } else {
+        final hwId = widget.homework['id'];
+        await ApiService.put(
+          '/homeworks/$hwId',
+          data: {
+            'title': _titleCtrl.text.trim(),
+            'description': _descCtrl.text.trim(),
+            'due_date': dateStr,
+            'file_path': uploadedFilePath,
+            'department_id': deptId,
+            'teacher_id': teacherId,
+          },
+        );
+
+        // Create student notification for update
+        try {
+          await ApiService.post(
+            '/notifications',
+            data: {
+              'title_ku': 'ئەرکی نوێ نوێکراوەتەوە: ${_titleCtrl.text.trim()}',
+              'title_en': 'Homework Updated: ${_titleCtrl.text.trim()}',
+              'description_ku': 'ئەرکێکی پێشوو نوێکراوەتەوە بۆ بەشەکەت. کاتی کۆتایی نوێ: $dateStr.',
+              'description_en': 'A homework assignment has been updated. New Due: $dateStr.',
+              'target_audience': 'dept_$deptId',
+            },
+          );
+        } catch (e) {
+          debugPrint('Failed to send notification: $e');
+        }
       }
 
       if (!mounted) return;
@@ -509,9 +586,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Post New Homework',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  Text(
+                    widget.homework == null ? 'Post New Homework' : 'Edit Homework',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -547,7 +624,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 ),
               ),
               const SizedBox(height: 6),
-              _selectedFile == null
+              _selectedFile == null && _existingFilePath == null
                   ? OutlinedButton.icon(
                       onPressed: _pickFile,
                       icon: const Icon(Icons.attach_file_rounded),
@@ -572,7 +649,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              _selectedFile!.name,
+                              _selectedFile != null
+                                  ? _selectedFile!.name
+                                  : 'Existing Attachment',
                               style: TextStyle(
                                 color: isDark ? Colors.white : Colors.black,
                                 fontSize: 13,
@@ -586,6 +665,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                             onPressed: () {
                               setState(() {
                                 _selectedFile = null;
+                                _existingFilePath = null;
                               });
                             },
                             icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
@@ -643,9 +723,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text(
-                          'Submit Assignment',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      : Text(
+                          widget.homework == null ? 'Submit Assignment' : 'Save Changes',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
