@@ -189,7 +189,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                         Text(
                           _errorMessage!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: isDark ? Colors.white70 : Colors.black80, fontSize: 15),
+                          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 15),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
@@ -212,11 +212,11 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.group_off_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black30),
+                                  Icon(Icons.group_off_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black38),
                                   const SizedBox(height: 12),
                                   Text(
                                     'No students found in your department.',
-                                    style: TextStyle(color: isDark ? Colors.white50 : Colors.black50, fontSize: 14),
+                                    style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 14),
                                   ),
                                 ],
                               ),
@@ -304,7 +304,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                     CircularProgressIndicator(
                       value: rate,
                       strokeWidth: 8,
-                      backgroundColor: isDark ? Colors.white10 : Colors.black10,
+                      backgroundColor: isDark ? Colors.white10 : Colors.black12,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         rate > 0.8 ? const Color(0xFF34C759) : rate > 0.5 ? Colors.orange : Colors.red,
                       ),
@@ -312,7 +312,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                     Text(
                       '$ratePercent%',
                       style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black80,
+                        color: isDark ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -357,7 +357,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             Text(
               label,
               style: TextStyle(
-                color: isDark ? Colors.white60 : Colors.black60,
+                color: isDark ? Colors.white60 : Colors.black54,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -367,7 +367,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         Text(
           value,
           style: TextStyle(
-            color: isDark ? Colors.white : Colors.black85,
+            color: isDark ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 13,
           ),
@@ -401,7 +401,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 Text(
                   name,
                   style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black85,
+                    color: isDark ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -477,7 +477,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isActive ? Colors.white : (isDark ? Colors.white50 : Colors.black50),
+            color: isActive ? Colors.white : (isDark ? Colors.white54 : Colors.black54),
             fontWeight: FontWeight.bold,
             fontSize: 13,
           ),
@@ -498,7 +498,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         color: isDark ? const Color(0xFF0F172A) : Colors.white,
         border: Border(
           top: BorderSide(
-            color: isDark ? Colors.white10 : Colors.black15,
+            color: isDark ? Colors.white10 : Colors.black12,
             width: 0.5,
           ),
         ),

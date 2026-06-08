@@ -118,7 +118,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                           Text(
                             _errorMessage!,
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: isDark ? Colors.white70 : Colors.black80, fontSize: 15),
+                            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 15),
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
@@ -134,11 +134,11 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.assignment_turned_in_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black30),
+                            Icon(Icons.assignment_turned_in_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black38),
                             const SizedBox(height: 12),
                             Text(
                               'No homework submissions yet.',
-                              style: TextStyle(color: isDark ? Colors.white50 : Colors.black50, fontSize: 14),
+                              style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 14),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
@@ -275,7 +275,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                 Text(
                   desc,
                   style: TextStyle(
-                    color: isDark ? Colors.white60 : Colors.black60,
+                    color: isDark ? Colors.white60 : Colors.black54,
                     fontSize: 13,
                     height: 1.4,
                   ),
@@ -286,7 +286,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                     Icon(
                       Icons.calendar_today_rounded,
                       size: 14,
-                      color: isDark ? Colors.white30 : Colors.black30,
+                      color: isDark ? Colors.white30 : Colors.black38,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -300,7 +300,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                     Text(
                       formattedDueDate,
                       style: TextStyle(
-                        color: isOverdue ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black80),
+                        color: isOverdue ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black87),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -494,7 +494,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                       Text(
                         'Due Date',
                         style: TextStyle(
-                          color: isDark ? Colors.white60 : Colors.black60,
+                          color: isDark ? Colors.white60 : Colors.black54,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),

@@ -517,16 +517,6 @@ class AppLocalizations {
       'ar': 'التخصّص',
       'en': 'Specialty',
     },
-    'student': {
-      'ku': 'قوتابی',
-      'ar': 'طالب',
-      'en': 'Student',
-    },
-    'teacher': {
-      'ku': 'مامۆستا',
-      'ar': 'مدرس',
-      'en': 'Teacher',
-    },
     'students_count': {
       'ku': 'قوتابیان',
       'ar': 'الطلاب',

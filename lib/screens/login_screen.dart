@@ -305,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     ],
                                     // Role toggle
                                     Container(
-                                      margin: const EdgeInsets.bottom(20),
+                                      margin: const EdgeInsets.only(bottom: 20),
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
@@ -346,9 +346,10 @@ class _LoginScreenState extends State<LoginScreen>
                                                 child: Text(
                                                   loc.get('student'),
                                                   style: TextStyle(
-                                                    color: !_isTeacher ? Colors.white : (isDark ? Colors.white70 : Colors.black80),
+                                                    color: !_isTeacher ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14,
+                                                    fontFamily: 'NotoKufiArabic',
                                                   ),
                                                 ),
                                               ),
@@ -384,9 +385,10 @@ class _LoginScreenState extends State<LoginScreen>
                                                 child: Text(
                                                   loc.get('teacher'),
                                                   style: TextStyle(
-                                                    color: _isTeacher ? Colors.white : (isDark ? Colors.white70 : Colors.black80),
+                                                    color: _isTeacher ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14,
+                                                    fontFamily: 'NotoKufiArabic',
                                                   ),
                                                 ),
                                               ),
