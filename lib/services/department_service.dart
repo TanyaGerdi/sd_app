@@ -1,22 +1,23 @@
-import 'package:safeen_institute/services/supabase_service.dart';
-import 'package:safeen_institute/services/cache_service.dart';
+import 'package:sd_institute/services/api_service.dart';
+import 'package:sd_institute/services/cache_service.dart';
 
 class DepartmentService {
-  // Grab all departments from the database and sort them by the admin's chosen order
+  // Grab all departments from the database via Laravel API
   static Future<List<Map<String, dynamic>>> getDepartments() async {
     const cacheKey = 'departments_all';
     try {
-      final data = await supabase
-          .from('departments')
-          .select()
-          .order('order_index', ascending: true)
-          .timeout(const Duration(seconds: 4));
+      final response = await ApiService.getRaw('/departments');
+      final data = List<Map<String, dynamic>>.from(
+        (response['data'] as List).map((d) => Map<String, dynamic>.from(d)),
+      );
 
-      // We need to map the Kurdish fields (_ku) so the UI doesn't break
+      // Map the Kurdish fields (_ku) so the UI doesn't break
       final mappedData = data.map((d) {
         List<String> gallery = [];
         if (d['gallery_images'] != null) {
-          gallery = List<String>.from(d['gallery_images']);
+          if (d['gallery_images'] is List) {
+            gallery = List<String>.from(d['gallery_images']);
+          }
         }
         return {
           'id': d['id'],
@@ -47,19 +48,19 @@ class DepartmentService {
   ) async {
     final cacheKey = 'dept_programs_$departmentId';
     try {
-      final data = await supabase
-          .from('department_programs')
-          .select()
-          .eq('department_id', departmentId)
-          .order('created_at', ascending: true)
-          .timeout(const Duration(seconds: 4));
+      final response = await ApiService.getRaw(
+        '/department_programs',
+        queryParams: {'department_id': departmentId},
+      );
+      final data = List<Map<String, dynamic>>.from(
+        (response['data'] as List).map((d) => Map<String, dynamic>.from(d)),
+      );
 
       // Map the Kurdish fields again for the UI
       final mappedData = data.map((d) {
         return {
           'id': d['id'],
-          'name': d['name_ku'] ?? 'پرۆگرامی نوێ',
-          // We can append the duration as the description if the UI expects it
+          'name': d['name_ku'] ?? 'پڕۆگرامی نوێ',
           'description': '${d['duration_years'] ?? 2} ساڵ', 
         };
       }).toList();

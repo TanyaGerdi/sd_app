@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/news_detail_screen.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
-import 'package:safeen_institute/utils/time_helper.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/news_detail_screen.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/utils/time_helper.dart';
 
 class AdvancedCarousel extends StatefulWidget {
   final List<Map<String, dynamic>> newsItems;
@@ -98,8 +98,8 @@ class _AdvancedCarouselState extends State<AdvancedCarousel> {
             (index) => AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 8,
-              width: _currentPage.round() == index ? 24 : 8,
+              height: 6,
+              width: _currentPage.round() == index ? 22 : 6,
               decoration: BoxDecoration(
                 color: _currentPage.round() == index
                     ? AppColors.primary
@@ -136,8 +136,8 @@ class _AdvancedCarouselState extends State<AdvancedCarousel> {
           margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(
-              24,
-            ), // Perfect premium 24px radius
+              28,
+            ),
             color: AppColors.primary,
             image: DecorationImage(
               image: cachedProvider(item['image_url']!),
@@ -158,17 +158,17 @@ class _AdvancedCarouselState extends State<AdvancedCarousel> {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(28),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
                         isDark
-                            ? const Color(0xFF141416).withValues(alpha: 0.8)
+                            ? const Color(0xFF1C1C1E).withValues(alpha: 0.8)
                             : Colors.black.withValues(alpha: 0.6),
                         isDark
-                            ? const Color(0xFF040405)
+                            ? const Color(0xFF000000)
                             : Colors.black.withValues(alpha: 0.85),
                       ],
                       stops: const [0.4, 0.8, 1.0],

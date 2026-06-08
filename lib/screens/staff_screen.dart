@@ -2,10 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/staff_detail_screen.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
-import 'package:safeen_institute/services/staff_service.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/staff_detail_screen.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/services/staff_service.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class StaffScreen extends StatefulWidget {
   final String? departmentFilter;
@@ -62,7 +63,7 @@ class _StaffScreenState extends State<StaffScreen> {
 
   Future<void> _loadStaff() async {
     final data = await StaffService.getStaff();
-    if (!mounted || data.isEmpty) return;
+    if (!mounted) return;
     setState(() {
       _staff = data.map((s) {
         final imgUrl = (s['image_url'] ?? '').toString().trim();
@@ -161,9 +162,11 @@ class _StaffScreenState extends State<StaffScreen> {
     final isDark = AppColors.isDark(context);
     final canGoBack = Navigator.canPop(context);
     final size = MediaQuery.of(context).size;
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
             ? const Color(0xFF040405)
@@ -197,167 +200,176 @@ class _StaffScreenState extends State<StaffScreen> {
               ),
             ),
             
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 16,
-                      left: 20,
-                      right: 20,
-                      bottom: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        if (canGoBack) ...[
-                          GestureDetector(
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.pop(context);
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 10,
-                                  sigmaY: 10,
-                                ),
-                                child: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? const Color(0xFF141822).withValues(alpha: 0.6)
-                                        : Colors.white.withValues(alpha: 0.7),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : Colors.black.withValues(alpha: 0.05),
-                                    ),
+            RefreshIndicator(
+              onRefresh: () async {
+                await _loadStaff();
+              },
+              color: AppColors.primary,
+              backgroundColor: isDark ? const Color(0xFF141822) : Colors.white,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top + 16,
+                        left: 20,
+                        right: 20,
+                        bottom: 12,
+                      ),
+                      child: Row(
+                        children: [
+                          if (canGoBack) ...[
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pop(context);
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 10,
+                                    sigmaY: 10,
                                   ),
-                                  child: Icon(
-                                    Icons.arrow_back_ios_new,
-                                    size: 18,
-                                    color: isDark ? Colors.white : AppColors.primary,
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF141822).withValues(alpha: 0.6)
+                                          : Colors.white.withValues(alpha: 0.7),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.08)
+                                            : Colors.black.withValues(alpha: 0.05),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.arrow_back_ios_new,
+                                      size: 18,
+                                      color: isDark ? Colors.white : AppColors.primary,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                        ],
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.departmentFilter != null
-                                    ? 'مامۆستایانی بەشەکە'
-                                    : 'مامۆستایان و ستاف',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  color: isDark ? Colors.white : const Color(0xFF111827),
-                                  letterSpacing: -0.5,
+                            const SizedBox(width: 16),
+                          ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.departmentFilter != null
+                                      ? localizations.get('dept_staff_title')
+                                      : localizations.get('staff_title'),
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark ? Colors.white : const Color(0xFF111827),
+                                    letterSpacing: -0.5,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${_filteredStaff.length} ئەندام',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white60
-                                      : const Color(0xFF6B7280),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${_filteredStaff.length} ${localizations.get('staff_members')}',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white60
+                                        : const Color(0xFF6B7280),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ).animate().fadeIn(
+                                  duration: 400.ms,
+                                  curve: Curves.easeOutCirc,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  if (widget.departmentFilter == null)
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _StickyFilterDelegate(
+                        isDark: isDark,
+                        mainCategories: _mainCategories,
+                        subCategories: _subCategories,
+                        selectedMainIndex: _selectedMainCategory,
+                        selectedSubIndex: _selectedSubCategory,
+                        onMainChanged: (index) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _selectedMainCategory = index;
+                            _selectedSubCategory = 0;
+                          });
+                        },
+                        onSubChanged: (index) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedSubCategory = index);
+                        },
+                      ),
+                    ),
+  
+                  // Empty State Notice
+                  if (_staff.isNotEmpty && _filteredStaff.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 60),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Icon(
+                               Icons.group_off_rounded,
+                               size: 64,
+                               color: isDark ? Colors.white24 : Colors.black26,
+                             ),
+                             const SizedBox(height: 16),
+                             Text(
+                               localizations.get('no_staff_found'),
+                               style: TextStyle(
+                                 color: isDark ? Colors.white60 : Colors.black54,
+                                 fontSize: 16,
+                                 fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
-                          ).animate().fadeIn(
-                                duration: 400.ms,
-                                curve: Curves.easeOutCirc,
-                              ),
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                
-                if (widget.departmentFilter == null)
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _StickyFilterDelegate(
-                      isDark: isDark,
-                      mainCategories: _mainCategories,
-                      subCategories: _subCategories,
-                      selectedMainIndex: _selectedMainCategory,
-                      selectedSubIndex: _selectedSubCategory,
-                      onMainChanged: (index) {
-                        HapticFeedback.selectionClick();
-                        setState(() {
-                          _selectedMainCategory = index;
-                          _selectedSubCategory = 0;
-                        });
-                      },
-                      onSubChanged: (index) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedSubCategory = index);
-                      },
-                    ),
-                  ),
-
-                // Empty State Notice
-                if (_staff.isNotEmpty && _filteredStaff.isEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 60),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-                           Icon(
-                             Icons.group_off_rounded,
-                             size: 64,
-                             color: isDark ? Colors.white24 : Colors.black26,
-                           ),
-                           const SizedBox(height: 16),
-                           Text(
-                             'هیچ ستافێک نەدۆزرایەوە لەم بەشەدا',
-                             style: TextStyle(
-                               color: isDark ? Colors.white60 : Colors.black54,
-                               fontSize: 16,
-                               fontWeight: FontWeight.w600,
-                             ),
-                           ),
-                         ],
-                       ),
+                  
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.72,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildStaffCard(
+                          context,
+                          _filteredStaff[index],
+                          index,
+                          isDark,
+                        ),
+                        childCount: _filteredStaff.length,
                       ),
                     ),
                   ),
-                
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
-                  sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.72,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildStaffCard(
-                        context,
-                        _filteredStaff[index],
-                        index,
-                        isDark,
-                      ),
-                      childCount: _filteredStaff.length,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -630,8 +642,56 @@ class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 134.0;
 
+  String _getCategoryDisplay(String category, AppLocalizations localizations) {
+    if (category == 'فەرمانبەران') return localizations.get('employees');
+    if (category == 'مامۆستایان') return localizations.get('teachers');
+    if (category == 'ئەنجومەن') return localizations.get('council');
+    return category;
+  }
+
+  String _getSubCategoryDisplay(String sub, AppLocalizations localizations) {
+    switch (sub) {
+      case 'هەموو':
+        return localizations.get('all');
+      case 'تۆمار':
+        return localizations.get('registration');
+      case 'دڵنیایی جۆری':
+        return localizations.get('quality_assurance');
+      case 'ڕاگر':
+        return localizations.get('dean');
+      case 'ڕاگەیاندن':
+        return localizations.get('media');
+      case 'ژمێریاری':
+        return localizations.get('accounting');
+      case 'کارگێڕی':
+        return localizations.get('administration');
+      case 'نوسینگەی ڕاگر':
+        return localizations.get('dean_office');
+      case 'مامۆستایانی بەشی پەرستاری':
+        return localizations.get('nursing_teachers');
+      case 'مامۆستایانی بەشی دەرمانسازی':
+        return localizations.get('pharmacy_teachers');
+      case 'مامۆستایانی بەشی ئینگلیزی پیشەیی':
+        return localizations.get('english_teachers');
+      case 'ڕاگری پەیمانگە':
+        return localizations.get('dean_of_institute');
+      case 'سەرۆک بەشی پەرستاری':
+        return localizations.get('head_of_nursing');
+      case 'سەرۆک بەشی دەرمانسازی':
+        return localizations.get('head_of_pharmacy');
+      case 'سەرۆک بەشی ئینگلیزی پیشەیی':
+        return localizations.get('head_of_english');
+      default:
+        return sub;
+    }
+  }
+
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
+    final isRtl = localeProvider.textDirection == TextDirection.rtl;
+
     // Glassmorphic background that intensifies when pinned/scrolling
     final blurAmount = (shrinkOffset > 0) ? 20.0 : 0.0;
     final bgOpacity = (shrinkOffset > 0) ? (isDark ? 0.8 : 0.9) : 0.0;
@@ -670,8 +730,9 @@ class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final itemWidth = constraints.maxWidth / mainCategories.length;
-                          double leftPosition =
-                              constraints.maxWidth - (itemWidth * (selectedMainIndex + 1));
+                          double leftPosition = isRtl
+                              ? constraints.maxWidth - (itemWidth * (selectedMainIndex + 1))
+                              : itemWidth * selectedMainIndex;
 
                           return Stack(
                             children: [
@@ -718,7 +779,7 @@ class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
                                               fontSize: 14,
                                               fontFamily: 'Rabar',
                                             ),
-                                            child: Text(mainCategories[index]),
+                                            child: Text(_getCategoryDisplay(mainCategories[index], localizations)),
                                           ),
                                         ),
                                       ),
@@ -775,7 +836,7 @@ class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
                         ),
                         child: Center(
                           child: Text(
-                            subCat,
+                            _getSubCategoryDisplay(subCat, localizations),
                             style: TextStyle(
                               color: isSelected 
                                   ? Colors.white 

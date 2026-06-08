@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/news_detail_screen.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/news_detail_screen.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 
 class SavedNewsScreen extends StatelessWidget {
   final List<Map<String, dynamic>> savedItems;
@@ -29,29 +30,10 @@ class SavedNewsScreen extends StatelessWidget {
                 child:
                     Row(
                       children: [
-                        GestureDetector(
+                        ClayIconButton(
+                          icon: Icons.arrow_back_ios_new,
+                          iconSize: 17,
                           onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.card(context),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: AppColors.shadow(context),
-                              border: isDark
-                                  ? Border.all(
-                                      color: AppColors.darkTextHint.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 17,
-                              color: isDark ? Colors.white : AppColors.primary,
-                            ),
-                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -183,18 +165,11 @@ class SavedNewsScreen extends StatelessWidget {
               transitionDuration: const Duration(milliseconds: 400),
             ),
           ),
-          child: Container(
+          child: ClayContainer(
             margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: AppColors.card(context),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: AppColors.shadow(context),
-              border: isDark
-                  ? Border.all(
-                      color: AppColors.darkTextHint.withValues(alpha: 0.12),
-                    )
-                  : null,
-            ),
+            borderRadius: 22,
+            depth: 10,
+            color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

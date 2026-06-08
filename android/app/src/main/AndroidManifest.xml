@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet access for Supabase & Firebase -->
+    <!-- Internet access for Laravel & Firebase -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Push notification permission for Android 13+ -->
@@ -13,19 +13,23 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
-        android:label="Safeen Institute"
+        android:label="SD Institute"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
 
         <!-- FCM default notification channel -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="safeen_high_importance" />
+            android:value="high_importance_channel" />
 
         <!-- Default notification icon -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
 
         <activity
             android:name=".MainActivity"

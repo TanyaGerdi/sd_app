@@ -13,6 +13,7 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
+        tertiary: AppColors.accent,
         surface: AppColors.surface,
       ),
       textTheme: _buildTextTheme(
@@ -28,7 +29,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         color: AppColors.surface,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -44,7 +45,10 @@ class AppTheme {
           text: AppColors.textPrimary,
           textSec: AppColors.textSecondary,
           hint: AppColors.textHint,
-          scaffoldShadow: const Color(0xFF1E3A5F).withValues(alpha: 0.06),
+          scaffoldShadow: const Color(0xFF6366F1).withValues(alpha: 0.05),
+          glassColor: Colors.white.withValues(alpha: 0.65),
+          glassBorder: Colors.black.withValues(alpha: 0.04),
+          glowColor: const Color(0xFF6366F1).withValues(alpha: 0.06),
         ),
       ],
     );
@@ -57,8 +61,9 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.darkBackground,
       primaryColor: AppColors.primary,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
+        primary: AppColors.primaryDark,
         secondary: AppColors.secondary,
+        tertiary: AppColors.accent,
         surface: AppColors.darkSurface,
       ),
       textTheme: _buildTextTheme(
@@ -74,7 +79,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         color: AppColors.darkSurface,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -83,14 +88,17 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
-      extensions: const [
+      extensions: [
         AppThemeExtension(
           bg: AppColors.darkBackground,
           card: AppColors.darkCard,
           text: AppColors.darkTextPrimary,
           textSec: AppColors.darkTextSecondary,
           hint: AppColors.darkTextHint,
-          scaffoldShadow: Colors.transparent, // Animated shadow disappearance
+          scaffoldShadow: Colors.transparent,
+          glassColor: const Color(0xFF1C1C1E).withValues(alpha: 0.55),
+          glassBorder: Colors.white.withValues(alpha: 0.08),
+          glowColor: const Color(0xFF818CF8).withValues(alpha: 0.08),
         ),
       ],
     );
@@ -100,21 +108,21 @@ class AppTheme {
     return GoogleFonts.notoKufiArabicTextTheme().copyWith(
       displayLarge: GoogleFonts.notoKufiArabic(
         color: primary,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
         letterSpacing: -0.5,
-        height: 1.3,
+        height: 1.2,
       ),
       displayMedium: GoogleFonts.notoKufiArabic(
         color: primary,
         fontSize: 24,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
         height: 1.3,
       ),
       titleLarge: GoogleFonts.notoKufiArabic(
         color: primary,
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.4,
       ),
       titleMedium: GoogleFonts.notoKufiArabic(

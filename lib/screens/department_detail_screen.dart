@@ -1,14 +1,14 @@
 import 'dart:ui';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/staff_detail_screen.dart';
-import 'package:safeen_institute/screens/staff_screen.dart';
-import 'package:safeen_institute/services/staff_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/staff_detail_screen.dart';
+import 'package:sd_institute/screens/staff_screen.dart';
+import 'package:sd_institute/services/staff_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class DepartmentDetailScreen extends StatefulWidget {
@@ -94,22 +94,20 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     final data = await StaffService.getStaffByDepartment(deptId);
     if (!mounted) return;
     setState(() {
-      if (data.isNotEmpty) {
-        _departmentStaff = data.map((s) {
-          final imgUrl = (s['image_url'] ?? '').toString().trim();
-          return {
-            'name': s['name']?.toString() ?? 'Staff',
-            'role': s['role']?.toString() ?? 'پۆست',
-            'image': imgUrl,
-            'department': s['department']?.toString() ?? deptName ?? 'بەش',
-            'email': s['email']?.toString() ?? '',
-            'phone': s['phone']?.toString() ?? '',
-            'degree': s['degree']?.toString() ?? '',
-            'specialty': s['specialty']?.toString() ?? '',
-            'academic_title': s['academic_title']?.toString() ?? '',
-          };
-        }).toList();
-      }
+      _departmentStaff = data.map((s) {
+        final imgUrl = (s['image_url'] ?? '').toString().trim();
+        return {
+          'name': s['name']?.toString() ?? 'Staff',
+          'role': s['role']?.toString() ?? 'پۆست',
+          'image': imgUrl,
+          'department': s['department']?.toString() ?? deptName ?? 'بەش',
+          'email': s['email']?.toString() ?? '',
+          'phone': s['phone']?.toString() ?? '',
+          'degree': s['degree']?.toString() ?? '',
+          'specialty': s['specialty']?.toString() ?? '',
+          'academic_title': s['academic_title']?.toString() ?? '',
+        };
+      }).toList();
       _isLoading = false;
     });
   }
@@ -143,9 +141,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
               : const Color(0xFFF7F7FA),
           body: Stack(
             children: [
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               //  CINEMATIC HERO with Ken Burns
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               Positioned(
                 top: -parallax,
                 left: 0,
@@ -214,9 +212,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                 ),
               ),
 
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               //  CONTENT (scrollable)
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               SingleChildScrollView(
                 controller: _scrollCtrl,
                 physics: const BouncingScrollPhysics(
@@ -227,15 +225,15 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                     // Hero spacer
                     SizedBox(height: heroH - 60),
 
-                    // ══════════════════════════════════
+                    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
                     //  FLOATING GLASSMORPHIC SHEET
-                    // ══════════════════════════════════
+                    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
                     Container(
                       constraints: BoxConstraints(minHeight: size.height * 0.7),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF0E0E12).withValues(alpha: 0.92)
-                            : Colors.white.withValues(alpha: 0.96),
+                            ? const Color(0xFF0A0A10).withValues(alpha: 0.94)
+                            : const Color(0xFFF2F2F7).withValues(alpha: 0.98),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(42),
                         ),
@@ -287,20 +285,20 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                                   ),
                                 ).animate().fadeIn(delay: 200.ms),
 
-                                // ─── Department Identity ───
+                                // â”€â”€â”€ Department Identity â”€â”€â”€
                                 _buildIdentityHeader(dept, accent, isDark),
 
                                 const SizedBox(height: 30),
 
-                                // ─── Video CTA ───
+                                // â”€â”€â”€ Video CTA â”€â”€â”€
                                 if (_youtubeController != null)
                                   _buildCinematicVideoButton(accent, isDark),
 
-                                // ─── About Section ───
+                                // â”€â”€â”€ About Section â”€â”€â”€
                                 const SizedBox(height: 34),
                                 _buildAboutSection(dept, accent, isDark),
 
-                                // ─── Gallery ───
+                                // â”€â”€â”€ Gallery â”€â”€â”€
                                 if (hasGallery) ...[
                                   const SizedBox(height: 40),
                                   _buildPremiumGallery(
@@ -310,7 +308,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                                   ),
                                 ],
 
-                                // ─── Staff ───
+                                // â”€â”€â”€ Staff â”€â”€â”€
                                 const SizedBox(height: 40),
                                 _buildStaffShowcase(dept, accent, isDark),
 
@@ -325,9 +323,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                 ),
               ),
 
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               //  BACK BUTTON (frosted glass)
-              // ═══════════════════════════════════
+              // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
               Positioned(
                 top: topPad + 10,
                 right: 18,
@@ -379,9 +377,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     );
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  GRADIENT HERO (when no image)
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildGradientHero(Color accent) {
     return AnimatedBuilder(
       animation: _floatCtrl,
@@ -410,9 +408,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     );
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  GLOW ORB
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _glowOrb(Color color, double size, double opacity) {
     return Container(
       width: size,
@@ -429,9 +427,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     );
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  IDENTITY HEADER
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildIdentityHeader(
     Map<String, dynamic> dept,
     Color accent,
@@ -527,9 +525,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
         .slideY(begin: 0.1, curve: Curves.easeOutCubic);
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  CINEMATIC VIDEO BUTTON
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildCinematicVideoButton(Color accent, bool isDark) {
     return AnimatedBuilder(
           animation: _shimmerCtrl,
@@ -628,9 +626,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
         .slideY(begin: 0.12, curve: Curves.easeOutCubic);
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  ABOUT SECTION
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildAboutSection(
     Map<String, dynamic> dept,
     Color accent,
@@ -642,19 +640,11 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
         _sectionHeader('دەربارەی بەش', accent, isDark, 250),
         const SizedBox(height: 16),
         // Magazine-style description card
-        Container(
+        ClayContainer(
+          borderRadius: 24,
+          depth: 12,
+          color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
           padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.03)
-                : accent.withValues(alpha: 0.02),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : accent.withValues(alpha: 0.06),
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -682,9 +672,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     );
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  SECTION HEADER (with animated accent bar)
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _sectionHeader(String title, Color accent, bool isDark, int delayMs) {
     return Row(
           children: [
@@ -729,9 +719,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
         .slideX(begin: -0.05);
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  PREMIUM GALLERY
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildPremiumGallery(List<String> images, Color accent, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,7 +738,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
-                '${images.length} وێنە',
+                '\${images.length} وێنە',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -804,9 +794,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     );
   }
 
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  STAFF SHOWCASE
-  // ═══════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildStaffShowcase(
     Map<String, dynamic> dept,
     Color accent,
@@ -933,9 +923,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
   }
 }
 
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  GALLERY CARD (3D tilt + shadow on press)
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 class _GalleryCard extends StatefulWidget {
   final String imageUrl;
   final int index;
@@ -978,7 +968,12 @@ class _GalleryCardState extends State<_GalleryCard> {
             width: 260,
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
-              ..scale(_pressed ? 0.95 : 1.0),
+              ..scaleByDouble(
+                _pressed ? 0.95 : 1.0,
+                _pressed ? 0.95 : 1.0,
+                1,
+                1,
+              ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
@@ -1083,9 +1078,9 @@ class _GalleryCardState extends State<_GalleryCard> {
   }
 }
 
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  PREMIUM STAFF CARD
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 class _PremiumStaffCard extends StatefulWidget {
   final Map<String, String> person;
   final Color accent;
@@ -1243,9 +1238,9 @@ class _PremiumStaffCardState extends State<_PremiumStaffCard> {
   }
 }
 
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  CINEMATIC GALLERY VIEWER
-// ═══════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 class _CinematicGalleryViewer extends StatefulWidget {
   final List<String> images;
   final int initialIndex;

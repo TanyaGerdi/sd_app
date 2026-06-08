@@ -1,10 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/institute_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/institute_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class GuidelinesScreen extends StatefulWidget {
   const GuidelinesScreen({super.key});
@@ -21,24 +22,64 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
   String _admissionImageUrl = '';
   String _academicYear = '2024-2025';
 
-  // Hardcoded defaults when the database has nothing yet
-  static const _fallbackGuidelines = [
-    {
-      'title': 'مەرجی خوێندن لە زانکۆ و پەیمانگە تایبەتەکان',
-      'content':
-          'دوای دەرچوونی قوتابییان لە پۆلی دوازدەی ئامادەیی، پێویستە لە زانکۆلاین خۆیان تۆماربکەن؛ دواتر بە گوێرەی ئەو پلان و نمرەیەی کە وەزارەت دایناوە، لە زانکۆ و پەیمانگە حکومییەکان وەردەگیرێن.\n\nپاش گەراوەی ناوەکان، وەزارەت ناونووسین لە پەیمانگە تایبەتەکانیش رادەگەیەنێ.',
-    },
-    {
-      'title': 'ڕێنمایی وەرگرتن بەپێی سیستەمی ناوەخۆیی',
-      'content':
-          'دەرچووانی ساڵانی پێشوو ئامادەیی، مافی پێشکەشکردنی بڕوانامەیان بۆ کرێدیت.\n\nبەپێی ئەو مەرجە تایبەتییانەی بۆ هەر خوێندنێک دیاریکراوە، پێویستە لە پشکنینی پزیشکی دەرچووبێت.',
-    },
-    {
-      'title': 'پێداویستییەکانی تۆمارکردن',
-      'content':
-          'بڕوانامەی دەرچوونی پۆلی دوازدە کە پەسەندکراو بێت لەلایەن پەروەردە.\nپێناسی باری شارستانی یان کارتی نیشتمانی.\nوێنەی کەسی تازە بە باکگراوندی سپی.',
-    },
-  ];
+  // Localized fallback defaults when the database has nothing yet
+  List<Map<String, dynamic>> _getLocalizedFallbacks(String lang) {
+    if (lang == 'en') {
+      return [
+        {
+          'title': 'Admission Requirements for Private Universities & Institutes',
+          'content':
+              'After graduating from high school, students must register in the Zankoline system; they will then be admitted to public universities and institutes according to the plan and grades set by the ministry.\n\nAfter the results are announced, the ministry will also announce enrollment in private institutes.',
+        },
+        {
+          'title': 'Admission Guidelines According to Internal Regulations',
+          'content':
+              'Graduates of previous academic years have the right to apply.\n\nAccording to the specific requirements set for each department, the candidate must pass the medical examination.',
+        },
+        {
+          'title': 'Registration Requirements',
+          'content':
+              '• High school graduation certificate certified by the Directorate of Education.\n• Civil status ID or National Card.\n• Recent personal photos with a white background.',
+        },
+      ];
+    } else if (lang == 'ar') {
+      return [
+        {
+          'title': 'شروط الدراسة في الجامعات والمعاهد الأهلية',
+          'content':
+              'بعد تخرج الطلاب من المرحلة الإعدادية، يجب عليهم التسجيل في نظام زانكولاين؛ ثم يتم قبولهم في الجامعات والمعاهد الحكومية وفقاً للخطة والدرجات التي تحددها الوزارة.\n\nبعد إعلان النتائج، تعلن الوزارة أيضاً عن فتح باب القبول في المعاهد الأهلية.',
+        },
+        {
+          'title': 'تعليمات القبول وفق النظام الداخلي',
+          'content':
+              'يحق لخريجي السنوات السابقة التقديم.\n\nوفقاً للشروط الخاصة المحددة لكل تخصص، يجب على المتقدم اجتياز الفحص الطبي.',
+        },
+        {
+          'title': 'مستندات التسجيل المطلوبة',
+          'content':
+              '• وثيقة تخرج الدراسة الإعدادية مصدقة من مديرية التربية.\n• هوية الأحوال المدنية أو البطاقة الوطنية.\n• صور شخصية حديثة بخلفية بيضاء.',
+        },
+      ];
+    } else {
+      return [
+        {
+          'title': 'مەرجی خوێندن لە زانکۆ و پەیمانگە تایبەتەکان',
+          'content':
+              'دوای دەرچوونی قوتابییان لە پۆلی دوازدەی ئامادەیی، پێویستە لە زانکۆلاین خۆیان تۆماربکەن؛ دواتر بە گوێرەی ئەو پلان و نمرەیەی کە وەزارەت دایناوە، لە زانکۆ و پەیمانگە حکومییەکان وەردەگیرێن.\n\nپاش گەراوەی ناوەکان، وەزارەت ناونووسین لە پەیمانگە تایبەتەکانیش رادەگەیەنێ.',
+        },
+        {
+          'title': 'ڕێنمایی وەرگرتن بەپێی سیستەمی ناوەخۆیی',
+          'content':
+              'دەرچووانی ساڵانی پێشووی ئامادەیی، مافی پێشکەشکردنیان هەیە.\n\nبەپێی ئەو مەرجە تایبەتانەی بۆ هەر خوێندنێک دیاریکراوە، پێویستە لە پشکنینی پزیشکی دەرچووبێت.',
+        },
+        {
+          'title': 'پێداویستییەکانی تۆمارکردن',
+          'content':
+              '• بڕوانامەی دەرچوونی پۆلی دوازدە کە پەسەندکراو بێت لەلایەن پەروەردە.\n• پێناسی باری شارستانی یان کارتی نیشتمانی.\n• وێنەی کەسی تازە بە باکگراوندی سپی.',
+        },
+      ];
+    }
+  }
 
   @override
   void initState() {
@@ -61,11 +102,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
     final year = (results[2] as String).trim();
 
     setState(() {
-      _guidelines = data.isNotEmpty
-          ? data
-          : _fallbackGuidelines
-                .map((g) => Map<String, dynamic>.from(g))
-                .toList();
+      _guidelines = data;
       _admissionImageUrl = imgUrl;
       _academicYear = year.isNotEmpty ? year : '2024-2025';
       _isLoading = false;
@@ -76,13 +113,27 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final size = MediaQuery.of(context).size;
+    final localeProvider = LocaleProviderInherited.of(context);
+    final lang = localeProvider.language.name;
+
+    final displayGuidelines = _guidelines.isNotEmpty
+        ? _guidelines
+        : _getLocalizedFallbacks(lang);
+
+    final displayAcademicYear = lang == 'en'
+        ? 'Academic Year $_academicYear'
+        : (lang == 'ar' ? 'العام الدراسي $_academicYear' : 'ساڵی خوێندنی $_academicYear');
+
+    final displayTitle = lang == 'en'
+        ? 'Student Admission\nGuidelines'
+        : (lang == 'ar' ? 'إرشادات\nقبول الطلاب' : 'ڕێنماییەکانی\nوەرگرتنی قوتابییان');
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Background orbs
@@ -116,44 +167,20 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 parent: AlwaysScrollableScrollPhysics(),
               ),
               slivers: [
-                // ── Hero AppBar ──────────────────────────────────────────
+                // ── Hero AppBar ──────────────────────────────────────
                 SliverAppBar(
                   expandedHeight: 320,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   stretch: true,
                   pinned: true,
-                  leading: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.1)
-                                  : Colors.black.withValues(alpha: 0.05),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.2)
-                                    : Colors.black.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: isDark ? Colors.white : Colors.black87,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ),
+                  leading: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: ClayIconButton(
+                      icon: Icons.arrow_back_ios_new,
+                      size: 44,
+                      iconSize: 18,
+                      onTap: () => Navigator.pop(context),
                     ),
                   ).animate().fadeIn(duration: 400.ms),
                   flexibleSpace: FlexibleSpaceBar(
@@ -164,7 +191,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     background: Stack(
                       fit: StackFit.expand,
                       children: [
-                        // ── Background: DB image OR gradient fallback ──
+                        // Background: DB image OR gradient fallback
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(
                             bottom: Radius.circular(40),
@@ -180,13 +207,13 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Color(0xFF1E3A5F),
+                                        Color(0xFF6366F1),
                                         Color(0xFF2563EB),
-                                        Color(0xFF1E3A5F),
+                                        Color(0xFF6366F1),
                                       ],
                                     ),
                                   ),
-                                  child: Center(
+                                  child: const Center(
                                     child: Icon(
                                       Icons.menu_book_rounded,
                                       size: 60,
@@ -207,12 +234,12 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                               end: Alignment.topCenter,
                               colors: [
                                 (isDark
-                                        ? const Color(0xFF040405)
-                                        : const Color(0xFFF9FAFB))
+                                        ? const Color(0xFF000000)
+                                        : const Color(0xFFF2F2F7))
                                     .withValues(alpha: 0.95),
                                 (isDark
-                                        ? const Color(0xFF040405)
-                                        : const Color(0xFFF9FAFB))
+                                        ? const Color(0xFF000000)
+                                        : const Color(0xFFF2F2F7))
                                     .withValues(alpha: 0.4),
                                 Colors.transparent,
                               ],
@@ -221,7 +248,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                           ),
                         ),
 
-                        // ── Bottom text overlay ────────────────────────
+                        // Bottom text overlay
                         Positioned(
                           bottom: 40,
                           left: 24,
@@ -229,7 +256,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Academic year badge — from DB
+                              // Academic year badge
                               Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 14,
@@ -247,7 +274,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                                       ),
                                     ),
                                     child: Text(
-                                      'ساڵی خوێندنی $_academicYear',
+                                      displayAcademicYear,
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -264,7 +291,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                               const SizedBox(height: 16),
 
                               Text(
-                                    'ڕێنماییەکانی\nوەرگرتنی قوتابییان',
+                                    displayTitle,
                                     style: TextStyle(
                                       color: isDark
                                           ? Colors.white
@@ -286,7 +313,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                   ),
                 ),
 
-                // ── Guidelines List ──────────────────────────────────────
+                // Guidelines List
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 60),
@@ -294,18 +321,18 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                         ? const Center(child: CircularProgressIndicator())
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: List.generate(_guidelines.length, (i) {
-                              final g = _guidelines[i];
+                            children: List.generate(displayGuidelines.length, (i) {
+                              final g = displayGuidelines[i];
                               final idx = (i + 1).toString().padLeft(2, '0');
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: i < _guidelines.length - 1 ? 32 : 0,
+                                  bottom: i < displayGuidelines.length - 1 ? 32 : 0,
                                 ),
                                 child: _buildEditorialSection(
                                   context,
                                   isDark,
                                   index: idx,
-                                  title: g['title']?.toString() ?? 'ڕێنمایی',
+                                  title: g['title']?.toString() ?? 'Guidelines',
                                   content: g['content']?.toString() ?? '',
                                   delay: 400 + i * 150,
                                 ),
@@ -348,112 +375,92 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
     required String content,
     required int delay,
   }) {
-    return Container(
+    return ClayContainer(
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF141416).withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.05),
-              width: 1.5,
-            ),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  blurRadius: 30,
-                  offset: const Offset(0, 15),
-                ),
-            ],
-          ),
+          borderRadius: 32,
+          depth: 12,
+          color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(32),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Stack(
-                children: [
-                  // Giant watermark index number
-                  Positioned(
-                    right: -20,
-                    top: -30,
-                    child: Text(
-                      index,
-                      style: TextStyle(
-                        fontSize: 160,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -10,
-                        color: AppColors.primary.withValues(
-                          alpha: isDark ? 0.05 : 0.03,
-                        ),
-                        height: 1.0,
+            child: Stack(
+              children: [
+                // Giant watermark index number
+                Positioned(
+                  right: -20,
+                  top: -30,
+                  child: Text(
+                    index,
+                    style: TextStyle(
+                      fontSize: 160,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -10,
+                      color: AppColors.primary.withValues(
+                        alpha: isDark ? 0.05 : 0.03,
                       ),
+                      height: 1.0,
                     ),
                   ),
-                  // Animated left accent bar
-                  Positioned(
-                    left: 0,
-                    top: 40,
-                    bottom: 40,
-                    child:
-                        Container(
-                              width: 4,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: const BorderRadius.horizontal(
-                                  right: Radius.circular(4),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    blurRadius: 10,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
+                ),
+                // Animated left accent bar
+                Positioned(
+                  left: 0,
+                  top: 40,
+                  bottom: 40,
+                  child:
+                      Container(
+                            width: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: const BorderRadius.horizontal(
+                                right: Radius.circular(4),
                               ),
-                            )
-                            .animate(onPlay: (c) => c.repeat(reverse: true))
-                            .shimmer(duration: 2.seconds, color: Colors.white),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF111827),
-                            height: 1.4,
-                            letterSpacing: -0.2,
-                          ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                          )
+                          .animate(onPlay: (c) => c.repeat(reverse: true))
+                          .shimmer(duration: 2.seconds, color: Colors.white),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF111827),
+                          height: 1.4,
+                          letterSpacing: -0.2,
                         ),
-                        const SizedBox(height: 20),
-                        Text(
-                          content,
-                          style: TextStyle(
-                            fontSize: 16,
-                            height: 2.0,
-                            color: isDark
-                                ? Colors.white70
-                                : const Color(0xFF4B5563),
-                            fontWeight: FontWeight.w500,
-                          ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        content,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 2.0,
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFF4B5563),
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         )

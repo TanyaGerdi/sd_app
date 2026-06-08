@@ -1,11 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/department_detail_screen.dart';
-import 'package:safeen_institute/services/department_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/department_detail_screen.dart';
+import 'package:sd_institute/services/department_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class DepartmentsScreen extends StatefulWidget {
   const DepartmentsScreen({super.key});
@@ -24,8 +25,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
       'teachers': '٧',
       'icon': Icons.medical_services_rounded,
       'color': Color(0xFFFF6B6B),
-      'image':
-          '',
+      'image': '',
     },
     {
       'name': 'دەرمانسازی',
@@ -83,7 +83,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
   Future<void> _loadDepartments() async {
     final data = await DepartmentService.getDepartments();
     if (!mounted || data.isEmpty) return;
-    
+
     // Always call setState to update UI (either list is filled, or empty state is shown)
     setState(() {
       departments = data.map((d) {
@@ -91,16 +91,17 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
         IconData iconData = Icons.school_rounded; // Default fallback
         if (d['icon'] == 'medical_services_rounded') {
           iconData = Icons.medical_services_rounded;
-        } else if (d['icon'] == 'local_pharmacy_rounded')
+        } else if (d['icon'] == 'local_pharmacy_rounded') {
           iconData = Icons.local_pharmacy_rounded;
-        else if (d['icon'] == 'language_rounded')
+        } else if (d['icon'] == 'language_rounded') {
           iconData = Icons.language_rounded;
-        else if (d['icon'] == 'computer_rounded')
+        } else if (d['icon'] == 'computer_rounded') {
           iconData = Icons.computer_rounded;
-        else if (d['icon'] == 'calculate_rounded')
+        } else if (d['icon'] == 'calculate_rounded') {
           iconData = Icons.calculate_rounded;
-        else if (d['icon'] == 'business_center_rounded')
+        } else if (d['icon'] == 'business_center_rounded') {
           iconData = Icons.business_center_rounded;
+        }
 
         // Parse color
         Color parsedColor = const Color(0xFF5B8DEF); // Default
@@ -130,9 +131,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
           'color': parsedColor,
           'video_url': d['video_url'] ?? '',
           'gallery_images': d['gallery_images'] ?? [],
-          'image': imgUrl.isNotEmpty
-              ? imgUrl
-              : '',
+          'image': imgUrl.isNotEmpty ? imgUrl : '',
         };
       }).toList();
     });
@@ -143,13 +142,15 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
     final canGoBack = Navigator.canPop(context);
     final isDark = AppColors.isDark(context);
     final size = MediaQuery.of(context).size;
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Ambient Orbs
@@ -197,59 +198,12 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (canGoBack) ...[
-                              GestureDetector(
+                              ClayIconButton(
+                                icon: Icons.arrow_back_ios_new,
+                                iconSize: 18,
                                 onTap: () {
-                                  HapticFeedback.lightImpact();
                                   Navigator.pop(context);
                                 },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                      sigmaX: 10,
-                                      sigmaY: 10,
-                                    ),
-                                    child: Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? const Color(
-                                                0xFF141416,
-                                              ).withValues(alpha: 0.6)
-                                            : Colors.white.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: isDark
-                                              ? Colors.white.withValues(
-                                                  alpha: 0.08,
-                                                )
-                                              : Colors.black.withValues(
-                                                  alpha: 0.04,
-                                                ),
-                                        ),
-                                        boxShadow: [
-                                          if (!isDark)
-                                            BoxShadow(
-                                              color: AppColors.primary
-                                                  .withValues(alpha: 0.03),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                        ],
-                                      ),
-                                      child: Icon(
-                                        Icons.arrow_back_ios_new,
-                                        size: 18,
-                                        color: isDark
-                                            ? Colors.white
-                                            : AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               ),
                               const SizedBox(width: 16),
                             ],
@@ -258,7 +212,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'بەشەکانی پەیمانگە',
+                                    localizations.get('departments_title'),
                                     style: TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.w900,
@@ -270,7 +224,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${departments.length} بەشی تایبەت',
+                                    '${departments.length} ${localizations.get('departments')}',
                                     style: TextStyle(
                                       color: isDark
                                           ? Colors.white70
@@ -348,217 +302,233 @@ class _InteractiveDepartmentCard extends StatefulWidget {
 
 class _InteractiveDepartmentCardState
     extends State<_InteractiveDepartmentCard> {
-  bool _isPressed = false;
-
   @override
   Widget build(BuildContext context) {
     final Color color = widget.dept['color'];
+    final hasImage = widget.dept['image']?.toString().isNotEmpty == true;
+    final localizations = AppLocalizations.of(context);
 
-    return GestureDetector(
-      onTapDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isPressed = true);
-      },
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        Navigator.push(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                DepartmentDetailScreen(department: widget.dept),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  final curved = CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.fastEaseInToSlowEaseOut,
-                  );
-                  return FadeTransition(
-                    opacity: curved,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.05),
-                        end: Offset.zero,
-                      ).animate(curved),
-                      child: child,
-                    ),
-                  );
-                },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
-      },
-      onTapCancel: () {
-        setState(() => _isPressed = false);
-      },
-      child:
-          AnimatedScale(
-                scale: _isPressed ? 0.94 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutQuart, // Heavy apple spring
-                child: Container(
-                  height: 190,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    image: DecorationImage(
+    return ClayButton(
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    DepartmentDetailScreen(department: widget.dept),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      final curved = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.fastEaseInToSlowEaseOut,
+                      );
+                      return FadeTransition(
+                        opacity: curved,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.05),
+                            end: Offset.zero,
+                          ).animate(curved),
+                          child: child,
+                        ),
+                      );
+                    },
+                transitionDuration: const Duration(milliseconds: 500),
+              ),
+            );
+          },
+          borderRadius: 28,
+          depth: 12,
+          child: Container(
+            height: 214,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              image: hasImage
+                  ? DecorationImage(
                       image: cachedProvider(widget.dept['image']),
                       fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withValues(
-                          alpha: widget.isDark ? 0.15 : 0.25,
+                    )
+                  : null,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.white.withValues(
+                    alpha: widget.isDark ? 0.10 : 0.18,
+                  ),
+                  width: 1.1,
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: hasImage
+                      ? [
+                          Colors.black.withValues(alpha: 0.78),
+                          Colors.black.withValues(alpha: 0.18),
+                          Colors.transparent,
+                        ]
+                      : [
+                          Color.lerp(
+                            color,
+                            Colors.black,
+                            widget.isDark ? 0.34 : 0.18,
+                          )!,
+                          color.withValues(alpha: 0.92),
+                          Color.lerp(
+                            color,
+                            Colors.white,
+                            widget.isDark ? 0.04 : 0.16,
+                          )!,
+                        ],
+                  stops: const [0.0, 0.55, 1.0],
+                ),
+              ),
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Spacer(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.22),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                        blurRadius: _isPressed ? 10 : 25,
-                        spreadRadius: _isPressed ? 0 : 2,
-                        offset: Offset(0, _isPressed ? 4 : 12),
+                        child: Icon(
+                          widget.dept['icon'],
+                          color: Colors.white.withValues(alpha: 0.94),
+                          size: 26,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.dept['name'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.dept['subtitle'],
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.22),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                     ],
-                    // A subtle glow ring border
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          color.withValues(alpha: 0.95),
-                          color.withValues(alpha: 0.3),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.65, 1.0],
+                  const SizedBox(height: 18),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      _badge(
+                        Icons.people_rounded,
+                        '${widget.dept['students']} ${localizations.get(widget.dept['students'] == '1' ? 'student' : 'students_count')}',
                       ),
-                    ),
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 10,
-                                  sigmaY: 10,
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    widget.dept['icon'],
-                                    color: Colors.white,
-                                    size: 26,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.dept['name'],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    widget.dept['subtitle'],
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            _badge(
-                              Icons.people_rounded,
-                              '${widget.dept['students']} قوتابی',
-                            ),
-                            const SizedBox(width: 12),
-                            _badge(
-                              Icons.person_rounded,
-                              '${widget.dept['teachers']} مامۆستا',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      _badge(
+                        Icons.person_rounded,
+                        '${widget.dept['teachers']} ${localizations.get(widget.dept['teachers'] == '1' ? 'teacher' : 'teachers_count')}',
+                      ),
+                    ],
                   ),
-                ),
-              )
-              .animate()
-              .fadeIn(
-                delay: Duration(milliseconds: 100 + (widget.index * 80)),
-                duration: 800.ms,
-                curve: Curves.fastEaseInToSlowEaseOut,
-              )
-              .slideY(
-                begin: 0.08,
-                delay: Duration(milliseconds: 100 + (widget.index * 80)),
-                duration: 800.ms,
-                curve: Curves.fastEaseInToSlowEaseOut,
+                ],
               ),
-    );
+            ),
+          ),
+        )
+        .animate()
+        .fadeIn(
+          delay: Duration(milliseconds: 100 + (widget.index * 80)),
+          duration: 800.ms,
+          curve: Curves.fastEaseInToSlowEaseOut,
+        )
+        .slideY(
+          begin: 0.08,
+          delay: Duration(milliseconds: 100 + (widget.index * 80)),
+          duration: 800.ms,
+          curve: Curves.fastEaseInToSlowEaseOut,
+        );
   }
 
   Widget _badge(IconData icon, String text) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: widget.isDark ? 0.12 : 0.18),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: Colors.white),
-              const SizedBox(width: 6),
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.95),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.95)),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.95),
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
+        ],
       ),
     );
   }

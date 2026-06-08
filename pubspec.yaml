@@ -1,4 +1,4 @@
-name: safeen_institute
+name: sd_institute
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,7 +39,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^8.0.2
   flutter_animate: ^4.5.2
-  supabase_flutter: ^2.8.4
   shared_preferences: ^2.3.3
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.1
@@ -71,6 +70,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/img/
+    - assets/google_fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

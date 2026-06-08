@@ -2,9 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/staff_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/staff_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StaffDetailScreen extends StatefulWidget {
@@ -27,10 +28,10 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
   Future<void> _loadPrograms() async {
     final staffId = widget.staff['id'];
     if (staffId == null) return;
-    
+
     final programs = await StaffService.getStaffPrograms(staffId);
     if (!mounted || programs.isEmpty) return;
-    
+
     setState(() {
       _staffPrograms = programs;
     });
@@ -46,8 +47,8 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Ambient Orbs
@@ -134,7 +135,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     );
   }
 
-  Widget _buildCinematicHeader(BuildContext context, bool isDark, Map<String, String> staff) {
+  Widget _buildCinematicHeader(
+    BuildContext context,
+    bool isDark,
+    Map<String, String> staff,
+  ) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -143,7 +148,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
           height: 240,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF141416) : Colors.black87,
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.black87,
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(40),
             ),
@@ -253,7 +258,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isDark ? const Color(0xFF141416) : Colors.white,
+                    color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                   ),
                   child: CircleAvatar(
                     radius: 46,
@@ -262,7 +267,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                         ? cachedProvider(staff['image']!)
                         : null,
                     child: (staff['image'] ?? '').isEmpty
-                        ? Icon(Icons.person_rounded, size: 46, color: isDark ? Colors.white54 : Colors.black26)
+                        ? Icon(
+                            Icons.person_rounded,
+                            size: 46,
+                            color: isDark ? Colors.white54 : Colors.black26,
+                          )
                         : null,
                   ),
                 ),
@@ -274,95 +283,89 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
 
               const SizedBox(height: 16),
 
-              // Name and Role Plate
-              ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 24,
-                          horizontal: 20,
+              ClayContainer(
+                    borderRadius: 28,
+                    depth: 12,
+                    color: isDark
+                        ? const Color(0xFF1E1E24)
+                        : const Color(0xFFE8EAF0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 20,
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(
+                              alpha: isDark ? 0.03 : 0.16,
+                            ),
+                            Colors.transparent,
+                            AppColors.accent.withValues(
+                              alpha: isDark ? 0.02 : 0.04,
+                            ),
+                          ],
                         ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1C1C1E).withValues(alpha: 0.6)
-                              : Colors.white.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.04),
-                            width: 1.5,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            staff['name'] ?? '',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF111827),
+                              letterSpacing: -0.5,
+                            ),
                           ),
-                          boxShadow: [
-                            if (!isDark)
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              staff['name'] ?? '',
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              staff['role'] ?? '',
                               style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF111827),
-                                letterSpacing: -0.5,
+                                fontSize: 14,
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.school_rounded,
+                                size: 16,
+                                color: isDark ? Colors.white54 : Colors.black54,
                               ),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                staff['role'] ?? '',
+                              const SizedBox(width: 6),
+                              Text(
+                                staff['department'] ?? 'بەشی IT',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.accent,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black87,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.school_rounded,
-                                  size: 16,
-                                  color: isDark
-                                      ? Colors.white54
-                                      : Colors.black54,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  staff['department'] ?? 'بەشی IT',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark
-                                        ? Colors.white70
-                                        : Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -387,7 +390,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     );
   }
 
-  Widget _buildActionsBoard(BuildContext context, bool isDark, Map<String, String> staff) {
+  Widget _buildActionsBoard(
+    BuildContext context,
+    bool isDark,
+    Map<String, String> staff,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(top: 240), // Push down below header stack
       child:
@@ -408,7 +415,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                     Icons.email_rounded,
                     'ئیمەیڵ',
                     const Color(0xFF5B8DEF),
-                    staff['email'] ?? 'ihsan@safeen.edu.krd',
+                    staff['email'] ?? 'ihsan@sd.edu.krd',
                   ),
                 ],
               )
@@ -494,7 +501,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     );
   }
 
-  Widget _buildInteractiveInfoCard(BuildContext context, bool isDark, Map<String, String> staff) {
+  Widget _buildInteractiveInfoCard(
+    BuildContext context,
+    bool isDark,
+    Map<String, String> staff,
+  ) {
     final items = [
       {
         'icon': Icons.school_rounded,
@@ -520,7 +531,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
       {
         'icon': Icons.email_rounded,
         'label': 'ئیمەیڵ',
-        'value': staff['email'] ?? 'ihsan@safeen.edu.krd',
+        'value': staff['email'] ?? 'ihsan@sd.edu.krd',
         'color': const Color(0xFFFF6B6B),
         'copyable': true,
       },
@@ -641,7 +652,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
         .slideY(begin: 0.05, duration: 500.ms, curve: Curves.easeOutCirc);
   }
 
-  Widget _buildInteractiveAboutCard(BuildContext context, bool isDark, Map<String, String> staff) {
+  Widget _buildInteractiveAboutCard(
+    BuildContext context,
+    bool isDark,
+    Map<String, String> staff,
+  ) {
     return _InteractiveGlassWidget(
           isDark: isDark,
           child: Padding(
@@ -652,9 +667,9 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                 _sectionTitle(context, isDark, 'دەربارەی', AppColors.secondary),
                 const SizedBox(height: 16),
                 Text(
-                  (staff['bio'] ?? '').isNotEmpty 
-                    ? staff['bio']! 
-                    : '${staff['name'] ?? ''} مامۆستایەکی شارەزاو بەتەجربەیە لە بەشی ${staff['department'] ?? 'زانستی کۆمپیوتەر'} لە پەیمانگەی سەفین. بەرپرسیارە لە فێرکردنی قوتابییان و پەرەپێدانی بابەتەکانی ${staff['specialty'] ?? 'زانستی کۆمپیوتەر'}.',
+                  (staff['bio'] ?? '').isNotEmpty
+                      ? staff['bio']!
+                      : '${staff['name'] ?? ''} مامۆستایەکی شارەزاو بەتەجربەیە لە بەشی ${staff['department'] ?? 'زانستی کۆمپیوتەر'} لە پەیمانگەی SD. بەرپرسیارە لە فێرکردنی قوتابییان و پەرەپێدانی بابەتەکانی ${staff['specialty'] ?? 'زانستی کۆمپیوتەر'}.',
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.white70 : Colors.black87,
@@ -673,79 +688,88 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
 
   Widget _buildInteractiveProgramsCard(BuildContext context, bool isDark) {
     return _InteractiveGlassWidget(
-      isDark: isDark,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionTitle(context, isDark, 'پڕۆگرامەکان', AppColors.primary),
-            const SizedBox(height: 20),
-            ..._staffPrograms.asMap().entries.map((entry) {
-              final i = entry.key;
-              final prog = entry.value;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          isDark: isDark,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionTitle(
+                  context,
+                  isDark,
+                  'پڕۆگرامەکان',
+                  AppColors.primary,
+                ),
+                const SizedBox(height: 20),
+                ..._staffPrograms.asMap().entries.map((entry) {
+                  final i = entry.key;
+                  final prog = entry.value;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.cast_for_education_rounded,
-                          color: AppColors.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              prog['program_type'] ?? 'خوێندن',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.white54 : Colors.black54,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              prog['program_name'] ?? '',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
+                            child: Icon(
+                              Icons.cast_for_education_rounded,
+                              color: AppColors.primary,
+                              size: 20,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  prog['program_type'] ?? 'خوێندن',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? Colors.white54
+                                        : Colors.black54,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  prog['program_name'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
+                      if (i < _staffPrograms.length - 1)
+                        Divider(
+                          height: 32,
+                          color: isDark
+                              ? Colors.white10
+                              : Colors.black.withValues(alpha: 0.05),
+                        ),
                     ],
-                  ),
-                  if (i < _staffPrograms.length - 1)
-                    Divider(
-                      height: 32,
-                      color: isDark
-                          ? Colors.white10
-                          : Colors.black.withValues(alpha: 0.05),
-                    ),
-                ],
-              );
-            }),
-          ],
-        ),
-      ),
-    )
-    .animate()
-    .fadeIn(delay: 700.ms, duration: 500.ms, curve: Curves.easeOutCirc)
-    .slideY(begin: 0.05, duration: 500.ms, curve: Curves.easeOutCirc);
+                  );
+                }),
+              ],
+            ),
+          ),
+        )
+        .animate()
+        .fadeIn(delay: 700.ms, duration: 500.ms, curve: Curves.easeOutCirc)
+        .slideY(begin: 0.05, duration: 500.ms, curve: Curves.easeOutCirc);
   }
 
   Widget _sectionTitle(
@@ -824,35 +848,16 @@ class _InteractiveGlassWidgetState extends State<_InteractiveGlassWidget> {
         scale: scale,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: widget.isDark
-                    ? const Color(0xFF141416).withValues(alpha: 0.6)
-                    : Colors.white.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: widget.isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.04),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  if (!widget.isDark)
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                ],
-              ),
-              child: widget.child,
-            ),
-          ),
+        child: ClayContainer(
+          width: double.infinity,
+          borderRadius: 28,
+          depth: _isPressed ? 5 : 12,
+          spread: _isPressed ? 0 : 2,
+          emboss: _isPressed,
+          color: widget.isDark
+              ? const Color(0xFF1E1E24)
+              : const Color(0xFFE8EAF0),
+          child: widget.child,
         ),
       ),
     );

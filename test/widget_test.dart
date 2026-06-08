@@ -7,15 +7,15 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:safeen_institute/main.dart';
+import 'package:sd_institute/main.dart';
 
 void main() {
   testWidgets('App loads and smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const SafeenInstituteApp());
+    await tester.pumpWidget(const SDInstituteApp());
     await tester.pumpAndSettle();
 
     // Verify that the our app title is visible on the Home Screen.
-    expect(find.text('پەیمانگەی سەفین'), findsWidgets);
+    expect(find.text('پەیمانگەی تەکنیکی SD'), findsWidgets);
   });
 }

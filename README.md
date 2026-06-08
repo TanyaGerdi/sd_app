@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # safeen-institute-app
 Institute application project for Safeen Institute
 =======
 # safeen_institute
+=======
+# sd_institute
+>>>>>>> fcf99cc (feat: Add Teacher attendance, homeworks timeline and role selector)
 
 A new Flutter project.
 

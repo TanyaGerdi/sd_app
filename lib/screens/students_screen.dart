@@ -2,9 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/news_screen.dart';
-import 'package:safeen_institute/screens/schedule_screen.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/news_screen.dart';
+import 'package:sd_institute/screens/schedule_screen.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 
 class StudentsScreen extends StatelessWidget {
   const StudentsScreen({super.key});
@@ -45,8 +46,8 @@ class StudentsScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Atmospheric Background Orbs
@@ -97,25 +98,11 @@ class StudentsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Navigation
-                        GestureDetector(
+                        ClayIconButton(
+                              icon: Icons.arrow_back_ios_new,
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 Navigator.pop(context);
                               },
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back_ios_new,
-                                  size: 18,
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
-                              ),
                             )
                             .animate()
                             .fadeIn(duration: 400.ms)
@@ -237,13 +224,16 @@ class _InteractiveCinematicCardState extends State<_InteractiveCinematicCard> {
               MaterialPageRoute(
                 builder: (context) {
                   if (widget.category != null) {
-                    return NewsScreen(category: widget.category!, title: widget.title);
+                    return NewsScreen(
+                      category: widget.category!,
+                      title: widget.title,
+                    );
                   }
                   return Scaffold(
                     appBar: AppBar(
                       title: Text(widget.title),
                       backgroundColor: widget.isDark
-                          ? const Color(0xFF040405)
+                          ? const Color(0xFF000000)
                           : Colors.white,
                       iconTheme: IconThemeData(
                         color: widget.isDark ? Colors.white : Colors.black,
@@ -256,14 +246,16 @@ class _InteractiveCinematicCardState extends State<_InteractiveCinematicCard> {
                       ),
                     ),
                     backgroundColor: widget.isDark
-                        ? const Color(0xFF040405)
-                        : const Color(0xFFF9FAFB),
+                        ? const Color(0xFF000000)
+                        : const Color(0xFFF2F2F7),
                     body: Center(
                       child: Text(
                         'بەمزووانە بەردەست دەبێت',
                         style: TextStyle(
                           fontSize: 18,
-                          color: widget.isDark ? Colors.white70 : Colors.black54,
+                          color: widget.isDark
+                              ? Colors.white70
+                              : Colors.black54,
                         ),
                       ),
                     ),
@@ -277,181 +269,138 @@ class _InteractiveCinematicCardState extends State<_InteractiveCinematicCard> {
             scale: _isPressed ? 0.95 : 1.0,
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            child: Container(
+            child: ClayContainer(
               width: double.infinity,
               height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(36),
-                boxShadow: [
-                  if (_isPressed)
-                    BoxShadow(
-                      color: widget.color.withValues(alpha: 0.3),
-                      blurRadius: 30,
-                      spreadRadius: 4,
-                      offset: const Offset(0, 10),
-                    )
-                  else if (!widget.isDark)
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                ],
-              ),
+              borderRadius: 32,
+              depth: _isPressed ? 5 : 14,
+              spread: _isPressed ? 0 : 2,
+              emboss: _isPressed,
+              color: widget.isDark
+                  ? const Color(0xFF1E1E24)
+                  : const Color(0xFFE8EAF0),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(36),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: widget.isDark
-                            ? [
-                                Colors.white.withValues(
-                                  alpha: _isPressed ? 0.08 : 0.04,
-                                ),
-                                Colors.white.withValues(alpha: 0.01),
-                              ]
-                            : [
-                                Colors.white.withValues(
-                                  alpha: _isPressed ? 0.9 : 0.7,
-                                ),
-                                Colors.white.withValues(alpha: 0.4),
-                              ],
-                      ),
-                      border: Border.all(
-                        color: _isPressed
-                            ? widget.color.withValues(alpha: 0.7)
-                            : Colors.white.withValues(
-                                alpha: widget.isDark ? 0.08 : 0.8,
-                              ),
-                        width: _isPressed ? 2 : 1.5,
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        // Massive spilling background icon
-                        Positioned(
-                          right: -30,
-                          bottom: -40,
-                          child: AnimatedScale(
-                            scale: _isPressed ? 1.1 : 1.0,
-                            duration: const Duration(milliseconds: 600),
-                            curve: Curves.easeOutExpo,
-                            child: Icon(
-                              widget.icon,
-                              size: 200,
-                              color: widget.color.withValues(
-                                alpha: widget.isDark ? 0.15 : 0.08,
-                              ),
+                borderRadius: BorderRadius.circular(32),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  child: Stack(
+                    children: [
+                      // Massive spilling background icon
+                      Positioned(
+                        right: -30,
+                        bottom: -40,
+                        child: AnimatedScale(
+                          scale: _isPressed ? 1.1 : 1.0,
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOutExpo,
+                          child: Icon(
+                            widget.icon,
+                            size: 200,
+                            color: widget.color.withValues(
+                              alpha: widget.isDark ? 0.15 : 0.08,
                             ),
                           ),
                         ),
+                      ),
 
-                        // Main Content
-                        Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: widget.color.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: widget.color.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        widget.icon,
-                                        color: widget.color,
-                                        size: 24,
-                                      ),
+                      // Main Content
+                      Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
                                     ),
-                                    const Spacer(),
-                                    Text(
-                                      widget.title,
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: -0.5,
-                                        color: widget.isDark
-                                            ? Colors.white
-                                            : const Color(0xFF111827),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      widget.subtitle,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.visible,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        height: 1.2,
-                                        fontWeight: FontWeight.w500,
-                                        color: widget.isDark
-                                            ? Colors.white70
-                                            : const Color(0xFF4B5563),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-
-                              // Glass pill button
-                              Container(
-                                    width: 48,
-                                    height: 48,
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: widget.isDark
-                                          ? Colors.white.withValues(alpha: 0.05)
-                                          : Colors.white.withValues(alpha: 0.5),
+                                      color: widget.color.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                        color: widget.isDark
-                                            ? Colors.white.withValues(
-                                                alpha: 0.1,
-                                              )
-                                            : Colors.white,
+                                        color: widget.color.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        size: 18,
-                                        color: widget.isDark
-                                            ? Colors.white54
-                                            : Colors.black54,
-                                      ),
+                                    child: Icon(
+                                      widget.icon,
+                                      color: widget.color,
+                                      size: 24,
                                     ),
-                                  )
-                                  .animate(target: _isPressed ? 1 : 0)
-                                  .moveX(
-                                    end: -5,
-                                    duration: 300.ms,
-                                    curve: Curves.easeOutExpo,
                                   ),
-                            ],
-                          ),
+                                  const Spacer(),
+                                  Text(
+                                    widget.title,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.5,
+                                      color: widget.isDark
+                                          ? Colors.white
+                                          : const Color(0xFF111827),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    widget.subtitle,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.visible,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      height: 1.2,
+                                      fontWeight: FontWeight.w500,
+                                      color: widget.isDark
+                                          ? Colors.white70
+                                          : const Color(0xFF4B5563),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+
+                            // Glass pill button
+                            Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: widget.isDark
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.white.withValues(alpha: 0.5),
+                                    border: Border.all(
+                                      color: widget.isDark
+                                          ? Colors.white.withValues(alpha: 0.1)
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 18,
+                                      color: widget.isDark
+                                          ? Colors.white54
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                )
+                                .animate(target: _isPressed ? 1 : 0)
+                                .moveX(
+                                  end: -5,
+                                  duration: 300.ms,
+                                  curve: Curves.easeOutExpo,
+                                ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

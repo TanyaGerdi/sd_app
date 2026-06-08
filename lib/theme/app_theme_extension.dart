@@ -7,6 +7,10 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
   final Color textSec;
   final Color hint;
   final Color scaffoldShadow;
+  // iOS 26 / VisionOS Glass tokens
+  final Color glassColor;
+  final Color glassBorder;
+  final Color glowColor;
 
   const AppThemeExtension({
     required this.bg,
@@ -15,6 +19,9 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     required this.textSec,
     required this.hint,
     required this.scaffoldShadow,
+    required this.glassColor,
+    required this.glassBorder,
+    required this.glowColor,
   });
 
   @override
@@ -25,6 +32,9 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     Color? textSec,
     Color? hint,
     Color? scaffoldShadow,
+    Color? glassColor,
+    Color? glassBorder,
+    Color? glowColor,
   }) {
     return AppThemeExtension(
       bg: bg ?? this.bg,
@@ -33,6 +43,9 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       textSec: textSec ?? this.textSec,
       hint: hint ?? this.hint,
       scaffoldShadow: scaffoldShadow ?? this.scaffoldShadow,
+      glassColor: glassColor ?? this.glassColor,
+      glassBorder: glassBorder ?? this.glassBorder,
+      glowColor: glowColor ?? this.glowColor,
     );
   }
 
@@ -51,6 +64,9 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       textSec: Color.lerp(textSec, other.textSec, t)!,
       hint: Color.lerp(hint, other.hint, t)!,
       scaffoldShadow: Color.lerp(scaffoldShadow, other.scaffoldShadow, t)!,
+      glassColor: Color.lerp(glassColor, other.glassColor, t)!,
+      glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
+      glowColor: Color.lerp(glowColor, other.glowColor, t)!,
     );
   }
 }

@@ -1,20 +1,17 @@
-import 'package:safeen_institute/services/supabase_service.dart';
-import 'package:safeen_institute/services/cache_service.dart';
+import 'package:sd_institute/services/api_service.dart';
+import 'package:sd_institute/services/cache_service.dart';
 
 class InstituteService {
-  // Grab the global settings from our new app_settings table.
+  // Grab the global settings from the app_settings table via Laravel API.
   static Future<Map<String, dynamic>> getAppSettings() async {
     const cacheKey = 'app_settings_global';
     try {
-      final data = await supabase
-          .from('app_settings')
-          .select()
-          .eq('id', 'global')
-          .maybeSingle();
+      final data = await ApiService.get('/app_settings', queryParams: {'id': 'global', 'single': '1'});
 
       if (data != null) {
-        await CacheService.saveMap(cacheKey, data);
-        return data;
+        final result = Map<String, dynamic>.from(data);
+        await CacheService.saveMap(cacheKey, result);
+        return result;
       }
     } catch (e) {
       return CacheService.getMap(cacheKey);
@@ -24,9 +21,19 @@ class InstituteService {
 
   static Future<Map<String, dynamic>> getInstitute() async {
     final settings = await getAppSettings();
+    String name = (settings['institute_name_ku'] ?? 'پەیمانگەی تەکنیکی SD').toString().trim();
+    String tagline = (settings['institute_name_en'] ?? 'SD Technical and Vocational Institute').toString().trim();
+
+    if (name.contains('پیرمام')) {
+      name = name.replaceAll('پیرمام', 'SD');
+    }
+    if (tagline.toLowerCase().contains('pirmam')) {
+      tagline = tagline.replaceAll(RegExp('pirmam', caseSensitive: false), 'SD');
+    }
+
     return {
-      'name': settings['institute_name_ku'] ?? 'پەیمانگەی تەکنیکی سەفین',
-      'tagline': settings['institute_name_en'] ?? 'Safeen Technical Institute',
+      'name': name,
+      'tagline': tagline,
       'description': settings['history_ku'] ?? 'هیچ زانیارییەک نەدۆزرایەوە.',
       'logo_url': settings['logo_url'] ?? '',
       'cover_url': '',
@@ -88,11 +95,11 @@ class InstituteService {
   /// Fetch social media links from the database.
   ///
   /// Rules:
-  /// • Skips any key whose value is empty or whose key contains `_count`
+  /// â€¢ Skips any key whose value is empty or whose key contains `_count`
   ///   (those are the stats stored in the same JSON, not real links).
-  /// • **Skips WhatsApp** — keys that contain `whatsapp`, `wa`, or
+  /// â€¢ **Skips WhatsApp** â€” keys that contain `whatsapp`, `wa`, or
   ///   values that start with `https://wa.me` or `https://api.whatsapp`.
-  /// • Returns a list of `{ 'platform': String, 'url': String }` maps,
+  /// â€¢ Returns a list of `{ 'platform': String, 'url': String }` maps,
   ///   ready to be rendered as social orbs in the Contact screen.
   static Future<List<Map<String, dynamic>>> getSocialMedia() async {
     const cacheKey = 'social_links_v2';
@@ -103,7 +110,7 @@ class InstituteService {
       if (raw == null) return [];
 
       // The DB stores social_links as a jsonb object like:
-      // { "facebook": "https://...", "instagram": "https://...", … }
+      // { "facebook": "https://...", "instagram": "https://...", â€¦ }
       final Map<String, dynamic> links = (raw is Map<String, dynamic>)
           ? raw
           : Map<String, dynamic>.from(raw);
@@ -114,15 +121,16 @@ class InstituteService {
         final p = platform.toLowerCase();
         final u = (url ?? '').toString().trim();
 
-        // ── Skip empty values and stat fields ──────────────────────────
+        // â”€â”€ Skip empty values and stat fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (u.isEmpty) return;
         if (p.contains('_count')) return;
 
-        // ── Skip WhatsApp (removed from UI per requirement) ────────────
+        // â”€â”€ Skip WhatsApp (removed from UI per requirement) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (p.contains('whatsapp') || p.contains('_wa') || p == 'wa') return;
         if (u.startsWith('https://wa.me') ||
-            u.startsWith('https://api.whatsapp'))
+            u.startsWith('https://api.whatsapp')) {
           return;
+        }
 
         result.add({'platform': platform, 'url': u});
       });
@@ -175,6 +183,6 @@ class InstituteService {
   // Official Institute Portal URL (e.g., student/staff portal)
   static Future<String> getPortalUrl() async {
     final settings = await getAppSettings();
-    return (settings['portal_url'] ?? 'https://safeen.portal.com').toString();
+    return (settings['portal_url'] ?? 'https://sd.portal.com').toString();
   }
 }

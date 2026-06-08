@@ -2,11 +2,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/guidelines_screen.dart';
-import 'package:safeen_institute/screens/future_activities_screen.dart';
-import 'package:safeen_institute/services/institute_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/guidelines_screen.dart';
+import 'package:sd_institute/screens/future_activities_screen.dart';
+import 'package:sd_institute/services/institute_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -40,11 +41,9 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
 
     if (!mounted) return;
     setState(() {
-      _registrationFormUrl = (results[0] as String).trim();
-      _admissionImageUrl = (results[1] as String).trim();
-      _academicYear = (results[2] as String).trim().isNotEmpty
-          ? results[2] as String
-          : '2024-2025';
+      _registrationFormUrl = (results[0]).trim();
+      _admissionImageUrl = (results[1]).trim();
+      _academicYear = (results[2]).trim().isNotEmpty ? results[2] : '2024-2025';
     });
   }
 
@@ -108,8 +107,8 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
         children: [
           Scaffold(
             backgroundColor: isDark
-                ? const Color(0xFF040405)
-                : const Color(0xFFF9FAFB),
+                ? const Color(0xFF000000)
+                : const Color(0xFFF2F2F7),
             body: Stack(
               children: [
                 // Atmospheric Background Orbs
@@ -150,37 +149,13 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       pinned: true,
-                      leading: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.pop(context);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.1)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.2)
-                                        : Colors.black.withValues(alpha: 0.1),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back_ios_new,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
+                      leading: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: ClayIconButton(
+                          icon: Icons.arrow_back_ios_new,
+                          size: 44,
+                          iconSize: 18,
+                          onTap: () => Navigator.pop(context),
                         ),
                       ).animate().fadeIn(duration: 400.ms),
                       flexibleSpace: FlexibleSpaceBar(
@@ -203,7 +178,7 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            // ── Academic year badge from DB ──────────────
+                            // â”€â”€ Academic year badge from DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -231,7 +206,7 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
                             ),
                           ],
                         ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1),
-                        // ── Admission image from DB ──────────────────────
+                        // â”€â”€ Admission image from DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         background: _admissionImageUrl.isNotEmpty
                             ? Stack(
                                 fit: StackFit.expand,
@@ -247,12 +222,12 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
                                         end: Alignment.bottomCenter,
                                         colors: [
                                           (isDark
-                                                  ? const Color(0xFF040405)
-                                                  : const Color(0xFFF9FAFB))
+                                                  ? const Color(0xFF000000)
+                                                  : const Color(0xFFF2F2F7))
                                               .withValues(alpha: 0.3),
                                           (isDark
-                                                  ? const Color(0xFF040405)
-                                                  : const Color(0xFFF9FAFB))
+                                                  ? const Color(0xFF000000)
+                                                  : const Color(0xFFF2F2F7))
                                               .withValues(alpha: 0.9),
                                         ],
                                       ),
@@ -264,7 +239,7 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
                       ),
                     ),
 
-                    // ── Cards ──────────────────────────────────────────
+                    // â”€â”€ Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
                       sliver: SliverList(
@@ -316,7 +291,7 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
             ),
           ),
 
-          // ── Full-screen download overlay ─────────────────────────────
+          // â”€â”€ Full-screen download overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           if (_isDownloading)
             Positioned.fill(
               child: Container(
@@ -597,7 +572,7 @@ class _GuidelinesHubScreenState extends State<GuidelinesHubScreen> {
   }
 }
 
-// ─── In-App PDF Viewer Screen ──────────────────────────────────────────────────
+// â”€â”€â”€ In-App PDF Viewer Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class PDFViewScreen extends StatefulWidget {
   final String filePath;
   final String title;
@@ -621,7 +596,7 @@ class _PDFViewScreenState extends State<PDFViewScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
+            ? const Color(0xFF000000)
             : const Color(0xFFF4F6F9),
         appBar: AppBar(
           backgroundColor: isDark ? const Color(0xFF0F0F12) : Colors.white,
@@ -707,7 +682,7 @@ class _PDFViewScreenState extends State<PDFViewScreen> {
   }
 }
 
-// ─── Reusable Interactive Glass Widget ────────────────────────────────────────
+// â”€â”€â”€ Reusable Interactive Glass Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _InteractiveGlassWidget extends StatefulWidget {
   final Widget child;
   final bool isDark;
@@ -749,32 +724,15 @@ class _InteractiveGlassWidgetState extends State<_InteractiveGlassWidget> {
         scale: _isPressed ? 0.94 : 1.0,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              decoration: BoxDecoration(
-                color: widget.isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.white.withValues(alpha: 0.6),
-                border: Border.all(
-                  color: widget.isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.03),
-                ),
-                boxShadow: [
-                  if (!widget.isDark)
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                ],
-              ),
-              child: widget.child,
-            ),
-          ),
+        child: ClayContainer(
+          borderRadius: 24,
+          depth: _isPressed ? 4 : 12,
+          spread: _isPressed ? 0 : 2,
+          emboss: _isPressed,
+          color: widget.isDark
+              ? const Color(0xFF1E1E24)
+              : const Color(0xFFE8EAF0),
+          child: widget.child,
         ),
       ),
     );

@@ -2,9 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/future_activities_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/future_activities_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 
 class FutureActivitiesScreen extends StatefulWidget {
   const FutureActivitiesScreen({super.key});
@@ -66,8 +67,8 @@ class _FutureActivitiesScreenState extends State<FutureActivitiesScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Ambient aurora background
@@ -128,22 +129,11 @@ class _FutureActivitiesScreenState extends State<FutureActivitiesScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                     child: Row(
                       children: [
-                        GestureDetector(
+                        ClayIconButton(
+                          icon: Icons.arrow_back_ios_new,
+                          size: 44,
+                          iconSize: 18,
                           onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.card(context),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: AppColors.shadow(context),
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 17,
-                              color: AppColors.primary,
-                            ),
-                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -266,33 +256,11 @@ class _FutureActivitiesScreenState extends State<FutureActivitiesScreen> {
     ];
     final colors = gradientSets[index % gradientSets.length];
 
-    return Container(
+    return ClayContainer(
           margin: const EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.04),
-            ),
-            boxShadow: isDark
-                ? [
-                    BoxShadow(
-                      color: colors[0].withValues(alpha: 0.1),
-                      blurRadius: 20,
-                      spreadRadius: -5,
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-          ),
-          clipBehavior: Clip.antiAlias,
+          borderRadius: 24,
+          depth: 12,
+          color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -353,7 +321,7 @@ class _FutureActivitiesScreenState extends State<FutureActivitiesScreen> {
                   ],
                 ),
 
-              // No image — show a colored header bar
+              // No image â€” show a colored header bar
               if (imageUrl.isEmpty)
                 Container(
                   height: 6,

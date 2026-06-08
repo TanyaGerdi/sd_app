@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.safeen.safeen_institute"
+    namespace = "com.sd.sd_institute"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.safeen.safeen_institute"
+        applicationId = "com.sd.sd_institute"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -3,12 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/screens/news_detail_screen.dart';
-import 'package:safeen_institute/services/post_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/screens/news_detail_screen.dart';
+import 'package:sd_institute/services/post_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:safeen_institute/utils/time_helper.dart';
+import 'package:sd_institute/utils/time_helper.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class NewsScreen extends StatefulWidget {
   final String category;
@@ -75,7 +77,9 @@ class _NewsScreenState extends State<NewsScreen> {
     setState(() {
       if (data.isNotEmpty) {
         _newsItems = data.map((item) {
-          final imgUrl = (item['image_url'] ?? item['image'] ?? '').toString().trim();
+          final imgUrl = (item['image_url'] ?? item['image'] ?? '')
+              .toString()
+              .trim();
           return <String, dynamic>{
             'id': item['id']?.toString() ?? '',
             'title': item['title']?.toString() ?? 'هەواڵێکی نوێ',
@@ -83,6 +87,7 @@ class _NewsScreenState extends State<NewsScreen> {
             'created_at': item['created_at']?.toString() ?? '',
             'category': item['category']?.toString() ?? widget.category,
             'image': imgUrl.isNotEmpty ? imgUrl : '',
+            'image_url': imgUrl.isNotEmpty ? imgUrl : '',
             'content': item['content']?.toString() ?? 'درێژەی هەواڵ...',
             'gallery_images': item['gallery_images'] ?? [],
           };
@@ -115,11 +120,16 @@ class _NewsScreenState extends State<NewsScreen> {
       PostService.toggleSavedPost(item['id']!, isSaving); // persist to database
     }
 
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          _bookmarked.contains(index) ? 'پاشەکەوتکرا' : 'لاڕبرا',
-          textDirection: TextDirection.rtl,
+          _bookmarked.contains(index)
+              ? localizations.get('post_saved')
+              : localizations.get('post_removed'),
+          textDirection: localeProvider.textDirection,
         ),
         backgroundColor: _bookmarked.contains(index)
             ? AppColors.secondary
@@ -134,8 +144,11 @@ class _NewsScreenState extends State<NewsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
+
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: AppColors.bg(context),
         body: CustomScrollView(
@@ -152,22 +165,10 @@ class _NewsScreenState extends State<NewsScreen> {
                 child:
                     Row(
                       children: [
-                        GestureDetector(
+                        ClayIconButton(
+                          icon: Icons.arrow_back_ios_new,
+                          iconSize: 17,
                           onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.card(context),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: AppColors.shadow(context),
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 17,
-                              color: AppColors.primary,
-                            ),
-                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -184,7 +185,7 @@ class _NewsScreenState extends State<NewsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${_newsItems.length} هەواڵ',
+                                '${_newsItems.length} ${localizations.get('news')}',
                                 style: TextStyle(
                                   color: AppColors.textSec(context),
                                   fontSize: 12,
@@ -240,27 +241,29 @@ class _NewsScreenState extends State<NewsScreen> {
                       ),
                     )
                   : _newsItems.isEmpty
-                      ? SliverToBoxAdapter(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 100),
-                              child: Text(
-                                'هیچ بابەتێک نەدۆزرایەوە',
-                                style: TextStyle(
-                                  color: AppColors.isDark(context) ? Colors.white54 : Colors.black54,
-                                  fontSize: 16,
-                                ),
-                              ),
+                  ? SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 100),
+                          child: Text(
+                            localizations.get('no_data'),
+                            style: TextStyle(
+                              color: AppColors.isDark(context)
+                                  ? Colors.white54
+                                  : Colors.black54,
+                              fontSize: 16,
                             ),
                           ),
-                        )
-                      : SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) =>
-                                _buildNewsCard(context, _newsItems[index], index),
-                            childCount: _newsItems.length,
-                          ),
                         ),
+                      ),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) =>
+                            _buildNewsCard(context, _newsItems[index], index),
+                        childCount: _newsItems.length,
+                      ),
+                    ),
             ),
           ],
         ),
@@ -269,13 +272,13 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Widget _buildShimmerCard(BuildContext context) {
-    return Container(
+    return ClayContainer(
       margin: const EdgeInsets.only(bottom: 24),
       height: 340,
-      decoration: BoxDecoration(
-        color: AppColors.isDark(context) ? Colors.white12 : Colors.black12,
-        borderRadius: BorderRadius.circular(32),
-      ),
+      color: AppColors.isDark(context)
+          ? const Color(0xFF1E1E24)
+          : const Color(0xFFE8EAF0),
+      child: const SizedBox.expand(),
     ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms);
   }
 
@@ -286,20 +289,23 @@ class _NewsScreenState extends State<NewsScreen> {
   ) {
     final isBookmarked = _bookmarked.contains(index);
     return _PremiumNewsCard(
-      item: item,
-      index: index,
-      isBookmarked: isBookmarked,
-      onBookmark: () => _toggleBookmark(index),
-    ).animate().fadeIn(
-      delay: (100 * index).ms,
-      duration: 600.ms,
-      curve: Curves.easeOutCirc,
-    ).slideY(
-      begin: 0.1,
-      delay: (100 * index).ms,
-      duration: 600.ms,
-      curve: Curves.easeOutCirc,
-    );
+          item: item,
+          index: index,
+          isBookmarked: isBookmarked,
+          onBookmark: () => _toggleBookmark(index),
+        )
+        .animate()
+        .fadeIn(
+          delay: (100 * index).ms,
+          duration: 600.ms,
+          curve: Curves.easeOutCirc,
+        )
+        .slideY(
+          begin: 0.1,
+          delay: (100 * index).ms,
+          duration: 600.ms,
+          curve: Curves.easeOutCirc,
+        );
   }
 }
 
@@ -325,6 +331,7 @@ class _PremiumNewsCardState extends State<_PremiumNewsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return GestureDetector(
       onTapDown: (_) {
         HapticFeedback.lightImpact();
@@ -337,22 +344,23 @@ class _PremiumNewsCardState extends State<_PremiumNewsCard> {
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
                 NewsDetailScreen(newsItem: widget.item),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              final curved = CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutQuint,
-              );
-              return FadeTransition(
-                opacity: curved,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.05),
-                    end: Offset.zero,
-                  ).animate(curved),
-                  child: child,
-                ),
-              );
-            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  final curved = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutQuint,
+                  );
+                  return FadeTransition(
+                    opacity: curved,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.05),
+                        end: Offset.zero,
+                      ).animate(curved),
+                      child: child,
+                    ),
+                  );
+                },
             transitionDuration: const Duration(milliseconds: 500),
           ),
         );
@@ -437,12 +445,14 @@ class _PremiumNewsCardState extends State<_PremiumNewsCard> {
                                 color: AppColors.primary.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.5,
+                                  ),
                                 ),
                               ),
-                              child: const Text(
-                                'هەواڵ',
-                                style: TextStyle(
+                              child: Text(
+                                localizations.get('news'),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -531,7 +541,11 @@ class _PremiumNewsCardState extends State<_PremiumNewsCard> {
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        TimeHelper.timeAgo(widget.item['time']?.toString() ?? widget.item['created_at']?.toString()),
+                                        TimeHelper.timeAgo(
+                                          widget.item['time']?.toString() ??
+                                              widget.item['created_at']
+                                                  ?.toString(),
+                                        ),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 12,
@@ -551,30 +565,33 @@ class _PremiumNewsCardState extends State<_PremiumNewsCard> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Colors.white.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.white.withValues(alpha: 0.4),
+                                    color: Colors.black.withValues(alpha: 0.12),
                                     blurRadius: 10,
-                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
                                   Text(
-                                    'زیاتر',
-                                    style: TextStyle(
-                                      color: Colors.black,
+                                    localizations.get('read_more'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
-                                  SizedBox(width: 4),
-                                  Icon(
+                                  const SizedBox(width: 4),
+                                  const Icon(
                                     Icons.arrow_forward_ios_rounded,
-                                    color: Colors.black,
+                                    color: Colors.white,
                                     size: 12,
                                   ),
                                 ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
 
 class FullscreenImageScreen extends StatelessWidget {
   final String imageUrl;

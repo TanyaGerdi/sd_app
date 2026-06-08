@@ -2,10 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/notification_service.dart';
-import 'package:safeen_institute/services/post_service.dart';
-import 'package:safeen_institute/screens/news_detail_screen.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/notification_service.dart';
+import 'package:sd_institute/services/post_service.dart';
+import 'package:sd_institute/screens/news_detail_screen.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -36,7 +37,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   String _timeAgo(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
-      final date = DateTime.parse(dateStr);
+      String formattedStr = dateStr;
+      if (!formattedStr.endsWith('Z') && !formattedStr.contains('+')) {
+        formattedStr = formattedStr.replaceAll(' ', 'T') + 'Z';
+      }
+      final date = DateTime.parse(formattedStr).toLocal();
       final diff = DateTime.now().difference(date);
       if (diff.inMinutes < 60) return '${diff.inMinutes} خولەک لەمەوپێش';
       if (diff.inHours < 24) return '${diff.inHours} کاتژمێر لەمەوپێش';
@@ -56,8 +61,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             Positioned(
@@ -94,41 +99,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
+                        ClayIconButton(
+                          icon: Icons.arrow_back_ios_new_rounded,
                           onTap: () {
-                            HapticFeedback.lightImpact();
                             Navigator.pop(context);
                           },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                height: 48,
-                                width: 48,
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(
-                                          0xFF141416,
-                                        ).withValues(alpha: 0.6)
-                                      : Colors.white.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.08)
-                                        : Colors.black.withValues(alpha: 0.04),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back_ios_new_rounded,
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColors.primary,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ),
                         ).animate().fadeIn(duration: 400.ms).scale(),
                         Text(
                               'ڕاگەیاندنەکان',
@@ -228,107 +203,103 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     int index,
   ) {
     return GestureDetector(
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        
-        final targetId = (notif['target_id'] ?? notif['reference_id'] ?? notif['post_id'] ?? '').toString();
-        final targetType = (notif['target_type'] ?? '').toString();
+          onTap: () async {
+            HapticFeedback.lightImpact();
 
-        if (targetId.isEmpty || targetId == 'null') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('ئەم ئاگادارکردنەوەیە بەستەری نییە (کۆنە)', textDirection: TextDirection.rtl),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
-          return;
-        }
+            final targetId =
+                (notif['target_id'] ??
+                        notif['reference_id'] ??
+                        notif['post_id'] ??
+                        '')
+                    .toString();
+            final targetType = (notif['target_type'] ?? '').toString();
 
-        // Show a brief loading indicator
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: Colors.black26,
-          builder: (_) => const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.secondary,
-              strokeWidth: 2.5,
-            ),
-          ),
-        );
+            if (targetId.isEmpty || targetId == 'null') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'ئەم ئاگادارکردنەوەیە بەستەری نییە (کۆنە)',
+                    textDirection: TextDirection.rtl,
+                  ),
+                  backgroundColor: Colors.redAccent,
+                ),
+              );
+              return;
+            }
 
-        try {
-          // Determine table based on target_type
-          String table = 'news';
-          if (targetType == 'student_news') {
-            table = 'student_news';
-          } else if (targetType == 'future_activities' || targetType == 'activities') {
-            table = 'activities';
-          }
-
-          final post = await PostService.getPostById(targetId, table: table)
-              .timeout(const Duration(seconds: 6));
-          
-          if (!mounted) return;
-          Navigator.pop(context); // dismiss loading
-
-          if (post != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => NewsDetailScreen(newsItem: post)),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('ببورە، هەواڵەکە نەدۆزرایەوە یان سڕاوەتەوە', textDirection: TextDirection.rtl),
-                backgroundColor: Colors.orange,
+            // Show a brief loading indicator
+            if (!mounted) return;
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              barrierColor: Colors.black26,
+              builder: (_) => const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.secondary,
+                  strokeWidth: 2.5,
+                ),
               ),
             );
-          }
-        } catch (e) {
-          if (mounted) {
-            Navigator.pop(context); // dismiss loading
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('هەڵەیەک ڕوویدا لە بارکردن، تکایە جارێکی تر هەوڵبدەرەوە', textDirection: TextDirection.rtl),
-              ),
-            );
-          }
-        }
-      },
-      child: Container(
-          margin: const EdgeInsets.only(bottom: 2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.2)
-                    : AppColors.primary.withValues(alpha: 0.05),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+
+            try {
+              // Determine table based on target_type
+              String table = 'news';
+              if (targetType == 'student_news') {
+                table = 'student_news';
+              } else if (targetType == 'future_activities' ||
+                  targetType == 'activities') {
+                table = 'activities';
+              }
+
+              final post = await PostService.getPostById(
+                targetId,
+                table: table,
+              ).timeout(const Duration(seconds: 6));
+
+              if (!mounted) return;
+              Navigator.pop(context); // dismiss loading
+
+              if (post != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewsDetailScreen(newsItem: post),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'ببورە، هەواڵەکە نەدۆزرایەوە یان سڕاوەتەوە',
+                      textDirection: TextDirection.rtl,
+                    ),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (mounted) {
+                Navigator.pop(context); // dismiss loading
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'هەڵەیەک ڕوویدا لە بارکردن، تکایە جارێکی تر هەوڵبدەرەوە',
+                      textDirection: TextDirection.rtl,
+                    ),
+                  ),
+                );
+              }
+            }
+          },
+          child: ClayContainer(
+            margin: const EdgeInsets.only(bottom: 2),
+            borderRadius: 24,
+            depth: 10,
+            color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
               child: Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF141416).withValues(alpha: 0.6)
-                      : Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.04),
-                    width: 1.5,
-                  ),
-                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -427,14 +398,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ),
           ),
-        ),
-      )
-      .animate()
-      .fadeIn(
-        delay: Duration(milliseconds: 100 + index * 60),
-        duration: 500.ms,
-      )
-      .slideY(begin: 0.1, duration: 500.ms, curve: Curves.easeOutCirc);
+        )
+        .animate()
+        .fadeIn(
+          delay: Duration(milliseconds: 100 + index * 60),
+          duration: 500.ms,
+        )
+        .slideY(begin: 0.1, duration: 500.ms, curve: Curves.easeOutCirc);
   }
 
   Widget _buildOrb({required Color color, required double size}) {

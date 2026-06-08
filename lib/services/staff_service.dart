@@ -1,26 +1,23 @@
-import 'package:safeen_institute/services/supabase_service.dart';
-import 'package:safeen_institute/services/cache_service.dart';
+import 'package:sd_institute/services/api_service.dart';
+import 'package:sd_institute/services/cache_service.dart';
 
 class StaffService {
-  // ─── Column list ─────────────────────────────────────────────────────────
-  // Explicit select so PostgREST never silently omits the new columns
-  // (sub_category, degree, specialty, academic_title) added in the migration.
-  static const _columns =
-      'id, full_name_ku, full_name_en, job_title_ku, job_title_en, '
-      'email, phone, phone_number, bio_ku, image_url, order_index, '
-      'sub_category, degree, specialty, academic_title, '
-      'departments(id, name_ku, name_en)';
-
-  // ─── Shared mapper ───────────────────────────────────────────────────────
+  // â”€â”€â”€ Shared mapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Map<String, dynamic> _mapStaff(Map<String, dynamic> s) {
-    // Department join — may be null if staff has no department set
+    // Department â€” may come as a nested object or may be null
     String deptName = '';
     String deptId = '';
-    final dept = s['departments'];
+    final dept = s['department'];
     if (dept is Map) {
       deptName = (dept['name_ku'] ?? '').toString();
       deptId = (dept['id'] ?? '').toString();
+    }
+    // Also try the 'departments' key from joined data
+    final depts = s['departments'];
+    if (depts is Map) {
+      deptName = (depts['name_ku'] ?? deptName).toString();
+      deptId = (depts['id'] ?? deptId).toString();
     }
 
     return {
@@ -30,13 +27,12 @@ class StaffService {
       'role': (s['job_title_ku'] ?? 'پۆست').toString(),
       'job_title_en': (s['job_title_en'] ?? '').toString(),
       'department': deptName,
-      'department_id': deptId,
+      'department_id': (s['department_id'] ?? deptId).toString(),
       'email': (s['email'] ?? '').toString(),
-      // phone_number takes priority; fall back to the older phone column
       'phone': (s['phone_number'] ?? s['phone'] ?? '').toString(),
       'bio': (s['bio_ku'] ?? '').toString(),
       'image_url': (s['image_url'] ?? '').toString(),
-      // ── New columns added in migration ──────────────────────────────
+      // â”€â”€ New columns added in migration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       'sub_category': (s['sub_category'] ?? '').toString(),
       'degree': (s['degree'] ?? '').toString(),
       'specialty': (s['specialty'] ?? '').toString(),
@@ -44,20 +40,17 @@ class StaffService {
     };
   }
 
-  // ─── getStaff ────────────────────────────────────────────────────────────
+  // â”€â”€â”€ getStaff â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<List<Map<String, dynamic>>> getStaff() async {
     const cacheKey = 'staff_new_all_v2';
     try {
-      final data = await supabase
-          .from('staff')
-          .select(_columns)
-          .order('order_index', ascending: true)
-          .timeout(const Duration(seconds: 6));
-
-      final result = List<Map<String, dynamic>>.from(
-        data.map((s) => _mapStaff(Map<String, dynamic>.from(s))),
+      final response = await ApiService.getRaw('/staff');
+      final data = List<Map<String, dynamic>>.from(
+        (response['data'] as List).map((d) => Map<String, dynamic>.from(d)),
       );
+
+      final result = data.map((s) => _mapStaff(s)).toList();
 
       if (result.isNotEmpty) {
         await CacheService.saveList(cacheKey, result);
@@ -68,23 +61,22 @@ class StaffService {
     }
   }
 
-  // ─── getStaffByDepartment ─────────────────────────────────────────────────
+  // â”€â”€â”€ getStaffByDepartment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<List<Map<String, dynamic>>> getStaffByDepartment(
     String departmentId,
   ) async {
     final cacheKey = 'staff_dept_v2_$departmentId';
     try {
-      final data = await supabase
-          .from('staff')
-          .select(_columns)
-          .eq('department_id', departmentId)
-          .order('order_index', ascending: true)
-          .timeout(const Duration(seconds: 6));
-
-      final result = List<Map<String, dynamic>>.from(
-        data.map((s) => _mapStaff(Map<String, dynamic>.from(s))),
+      final response = await ApiService.getRaw(
+        '/staff',
+        queryParams: {'department_id': departmentId},
       );
+      final data = List<Map<String, dynamic>>.from(
+        (response['data'] as List).map((d) => Map<String, dynamic>.from(d)),
+      );
+
+      final result = data.map((s) => _mapStaff(s)).toList();
 
       if (result.isNotEmpty) {
         await CacheService.saveList(cacheKey, result);
@@ -95,16 +87,11 @@ class StaffService {
     }
   }
 
-  // ─── getStaffById ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ getStaffById â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<Map<String, dynamic>?> getStaffById(String staffId) async {
     try {
-      final data = await supabase
-          .from('staff')
-          .select(_columns)
-          .eq('id', staffId)
-          .maybeSingle();
-
+      final data = await ApiService.get('/staff/$staffId');
       if (data != null) {
         return _mapStaff(Map<String, dynamic>.from(data));
       }

@@ -1,8 +1,17 @@
 class TimeHelper {
+  static DateTime parseUtc(String dateStr) {
+    String formattedStr = dateStr;
+    if (!formattedStr.endsWith('Z') && !formattedStr.contains('+')) {
+      // Replace space with T to make it ISO, and add Z for UTC
+      formattedStr = formattedStr.replaceAll(' ', 'T') + 'Z';
+    }
+    return DateTime.parse(formattedStr).toLocal();
+  }
+
   static String timeAgo(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
-      final date = DateTime.parse(dateStr);
+      final date = parseUtc(dateStr);
       final now = DateTime.now();
       final difference = now.difference(date);
 

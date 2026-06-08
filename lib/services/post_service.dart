@@ -1,14 +1,12 @@
 import 'dart:convert';
-import 'package:safeen_institute/services/supabase_service.dart';
-import 'package:safeen_institute/services/cache_service.dart';
+import 'package:sd_institute/services/api_service.dart';
+import 'package:sd_institute/services/cache_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostService {
-  // ─── Shared helpers ──────────────────────────────────────────────────────
+  // â”€â”€â”€ Shared helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  /// Safely converts the Supabase `gallery_images text[]` value to a clean
-  /// Dart list regardless of whether it arrives as a List, a Postgres literal
-  /// string "{url1,url2}", or null.
+  /// Safely converts the gallery_images value to a clean Dart list.
   static List<String> _parseGallery(dynamic raw) {
     if (raw == null) return [];
 
@@ -22,6 +20,15 @@ class PostService {
     if (raw is String) {
       final s = raw.trim();
       if (s.isEmpty) return [];
+      // If it's a JSON array string
+      if (s.startsWith('[') && s.endsWith(']')) {
+        try {
+          final decoded = jsonDecode(s);
+          if (decoded is List) {
+            return decoded.map((e) => e.toString()).toList();
+          }
+        } catch (_) {}
+      }
       // Postgres array literal: {url1,url2,url3}
       if (s.startsWith('{') && s.endsWith('}')) {
         final inner = s.substring(1, s.length - 1);
@@ -39,16 +46,12 @@ class PostService {
     return [];
   }
 
-  /// Maps a raw Supabase row into the canonical shape the UI consumes.
-  /// Handles all four tables: news, student_news, activities, student_quotes.
+  /// Maps a raw Laravel API row into the canonical shape the UI consumes.
   static Map<String, dynamic> _mapRow(
     Map<String, dynamic> d, {
     required String category,
   }) {
-    // activities uses description_ku instead of content_ku
     final content = (d['content_ku'] ?? d['description_ku'] ?? '').toString();
-
-    // activities has activity_date, others have created_at
     final dateRaw = (d['activity_date'] ?? d['created_at'] ?? '').toString();
 
     return {
@@ -61,78 +64,40 @@ class PostService {
       'category': category,
       'created_at': dateRaw,
       'time': dateRaw,
-      // activities-specific extras — safe no-ops for other tables
       'location': (d['location'] ?? '').toString(),
       'activity_date': (d['activity_date'] ?? '').toString(),
     };
   }
 
-  // ─── getPosts ────────────────────────────────────────────────────────────
+  // â”€â”€â”€ getPosts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<List<Map<String, dynamic>>> getPosts({String? category}) async {
     final cacheKey = 'custom_posts_${category ?? 'all'}';
 
     try {
       List<Map<String, dynamic>> result = [];
+      String endpoint = '/news';
+      Map<String, dynamic> queryParams = {};
 
       if (category == 'activities') {
-        // activities table: no is_published filter, different columns
-        final data = await supabase
-            .from('activities')
-            .select(
-              'id, title_ku, description_ku, image_url, '
-              'gallery_images, activity_date, location, created_at',
-            )
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6));
-
-        result = List<Map<String, dynamic>>.from(
-          data.map((d) => _mapRow(d, category: 'activities')),
-        );
+        endpoint = '/activities';
       } else if (category == 'student_news') {
-        final data = await supabase
-            .from('student_news')
-            .select(
-              'id, title_ku, content_ku, image_url, '
-              'gallery_images, created_at, is_published',
-            )
-            .eq('is_published', true)
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6));
-
-        result = List<Map<String, dynamic>>.from(
-          data.map((d) => _mapRow(d, category: 'student_news')),
-        );
+        endpoint = '/student_news';
+        queryParams['is_published'] = '1';
       } else if (category == 'quotes') {
-        final data = await supabase
-            .from('student_quotes')
-            .select(
-              'id, title_ku, content_ku, image_url, '
-              'gallery_images, created_at, is_published',
-            )
-            .eq('is_published', true)
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6));
-
-        result = List<Map<String, dynamic>>.from(
-          data.map((d) => _mapRow(d, category: 'quotes')),
-        );
+        endpoint = '/student_quotes';
+        queryParams['is_published'] = '1';
       } else {
-        // Default: news table
-        final data = await supabase
-            .from('news')
-            .select(
-              'id, title_ku, content_ku, image_url, '
-              'gallery_images, created_at, is_published, category',
-            )
-            .eq('is_published', true)
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6));
-
-        result = List<Map<String, dynamic>>.from(
-          data.map((d) => _mapRow(d, category: category ?? 'news')),
-        );
+        endpoint = '/news';
+        queryParams['is_published'] = '1';
       }
+
+      final response = await ApiService.getRaw(endpoint, queryParams: queryParams);
+      final List dataList = response['data'] ?? [];
+
+      result = List<Map<String, dynamic>>.from(
+        dataList.map((d) => _mapRow(Map<String, dynamic>.from(d), category: category ?? 'news')),
+      );
 
       if (result.isNotEmpty) {
         await CacheService.saveList(cacheKey, result);
@@ -143,54 +108,19 @@ class PostService {
     }
   }
 
-  // ─── getPostById ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ getPostById â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<Map<String, dynamic>?> getPostById(String id, {String? table}) async {
-    // Table → category label → select columns
-    final tableConfigs = [
-      {
-        'table': 'news',
-        'category': 'news',
-        'columns':
-            'id, title_ku, content_ku, image_url, gallery_images, created_at, category, content_en',
-      },
-      {
-        'table': 'student_news',
-        'category': 'student_news',
-        'columns':
-            'id, title_ku, content_ku, image_url, gallery_images, created_at, content_en',
-      },
-      {
-        'table': 'activities',
-        'category': 'activities',
-        'columns':
-            'id, title_ku, description_ku, image_url, gallery_images, activity_date, location, created_at',
-      },
-      {
-        'table': 'student_quotes',
-        'category': 'quotes',
-        'columns':
-            'id, title_ku, content_ku, image_url, gallery_images, created_at, content_en',
-      },
-    ];
+    final tablesToSearch = table != null ? [table] : ['news', 'student_news', 'activities', 'student_quotes'];
 
-    // If specific table provided, only check that one
-    final configsToSearch = table != null 
-      ? tableConfigs.where((c) => c['table'] == table).toList()
-      : tableConfigs;
-
-    for (final config in configsToSearch) {
+    for (final tbl in tablesToSearch) {
       try {
-        final data = await supabase
-            .from(config['table']!)
-            .select(config['columns']!)
-            .eq('id', id)
-            .maybeSingle();
-
+        final data = await ApiService.get('/$tbl/$id');
         if (data != null) {
+          String category = tbl == 'student_quotes' ? 'quotes' : tbl;
           return _mapRow(
             Map<String, dynamic>.from(data),
-            category: config['category']!,
+            category: category,
           );
         }
       } catch (_) {
@@ -200,24 +130,20 @@ class PostService {
     return null;
   }
 
-  // ─── getFeaturedPosts ────────────────────────────────────────────────────
+  // â”€â”€â”€ getFeaturedPosts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<List<Map<String, dynamic>>> getFeaturedPosts() async {
     const cacheKey = 'featured_posts_new';
 
     try {
-      final data = await supabase
-          .from('news')
-          .select(
-            'id, title_ku, content_ku, image_url, gallery_images, created_at',
-          )
-          .eq('is_published', true)
-          .order('created_at', ascending: false)
-          .limit(4)
-          .timeout(const Duration(seconds: 6));
+      final response = await ApiService.getRaw('/news', queryParams: {'is_published': '1'});
+      final List dataList = response['data'] ?? [];
+
+      // Limit to 4 elements client-side
+      final limitedList = dataList.take(4).toList();
 
       final result = List<Map<String, dynamic>>.from(
-        data.map((d) => _mapRow(d, category: 'news')),
+        limitedList.map((d) => _mapRow(Map<String, dynamic>.from(d), category: 'news')),
       );
 
       if (result.isNotEmpty) {
@@ -229,7 +155,7 @@ class PostService {
     }
   }
 
-  // ─── Saved posts ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ Saved posts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<String> _getDeviceId() async {
     final prefs = await SharedPreferences.getInstance();
@@ -246,29 +172,19 @@ class PostService {
 
     try {
       final deviceId = await _getDeviceId();
+      final response = await ApiService.getRaw('/saved_posts', queryParams: {'device_id': deviceId});
+      final List savedList = response['data'] ?? [];
 
-      final data = await supabase
-          .from('saved_posts')
-          .select(
-            'id, created_at, '
-            'news(id, title_ku, content_ku, description_ku, '
-            '     image_url, gallery_images, category, created_at)',
-          )
-          .eq('device_id', deviceId)
-          .order('created_at', ascending: false);
-
-      final result = List<Map<String, dynamic>>.from(
-        data
-            .map((d) {
-              final newsItem = d['news'];
-              if (newsItem == null) return <String, dynamic>{};
-              return _mapRow(
-                Map<String, dynamic>.from(newsItem),
-                category: (newsItem['category'] ?? 'news').toString(),
-              );
-            })
-            .where((e) => e.isNotEmpty),
-      );
+      final List<Map<String, dynamic>> result = [];
+      for (final item in savedList) {
+        final postId = item['post_id']?.toString();
+        if (postId != null) {
+          final post = await getPostById(postId);
+          if (post != null) {
+            result.add(post);
+          }
+        }
+      }
 
       if (result.isNotEmpty) {
         await CacheService.saveList(cacheKey, result);
@@ -283,43 +199,41 @@ class PostService {
     try {
       final deviceId = await _getDeviceId();
       if (isSaving) {
-        await supabase.from('saved_posts').insert({
+        await ApiService.post('/saved_posts', data: {
           'device_id': deviceId,
           'post_id': postId,
         });
       } else {
-        await supabase
-            .from('saved_posts')
-            .delete()
-            .eq('device_id', deviceId)
-            .eq('post_id', postId);
+        // Find the record ID first using filters
+        final response = await ApiService.getRaw('/saved_posts', queryParams: {
+          'device_id': deviceId,
+          'post_id': postId,
+          'single': '1',
+        });
+        final record = response['data'];
+        if (record != null && record['id'] != null) {
+          final recordId = record['id'];
+          await ApiService.delete('/saved_posts/$recordId');
+        }
       }
     } catch (_) {}
   }
 
-  // ─── getPostGallery ───────────────────────────────────────────────────────
-  // Fetches gallery images for a specific post.
-  // Primary source: `gallery_images text[]` column.
-  // Legacy fallback: `content_en` JSON with `{"galleryUrls": [...]}`.
+  // â”€â”€â”€ getPostGallery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   static Future<List<String>> getPostGallery(
     String postId, {
     String table = 'news',
   }) async {
     try {
-      final data = await supabase
-          .from(table)
-          .select('gallery_images, content_en')
-          .eq('id', postId)
-          .maybeSingle();
-
+      final data = await ApiService.get('/$table/$postId');
       if (data != null) {
-        // ── Primary: native array column ──────────────────────────
-        final fromArray = _parseGallery(data['gallery_images']);
+        final rawData = Map<String, dynamic>.from(data);
+        final fromArray = _parseGallery(rawData['gallery_images']);
         if (fromArray.isNotEmpty) return fromArray;
 
-        // ── Fallback: legacy JSON stored in content_en ────────────
-        final contentEn = (data['content_en'] ?? '').toString().trim();
+        // Fallback: legacy JSON stored in content_en
+        final contentEn = (rawData['content_en'] ?? '').toString().trim();
         if (contentEn.startsWith('{') && contentEn.contains('galleryUrls')) {
           try {
             final parsed = Map<String, dynamic>.from(

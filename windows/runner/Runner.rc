@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.safeen" "\0"
-            VALUE "FileDescription", "safeen_institute" "\0"
+            VALUE "CompanyName", "com.sd" "\0"
+            VALUE "FileDescription", "sd_institute" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "safeen_institute" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.safeen. All rights reserved." "\0"
-            VALUE "OriginalFilename", "safeen_institute.exe" "\0"
-            VALUE "ProductName", "safeen_institute" "\0"
+            VALUE "InternalName", "sd_institute" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.sd. All rights reserved." "\0"
+            VALUE "OriginalFilename", "sd_institute.exe" "\0"
+            VALUE "ProductName", "sd_institute" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

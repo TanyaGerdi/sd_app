@@ -1,102 +1,141 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:safeen_institute/screens/drawer_wrapper.dart';
-import 'package:safeen_institute/screens/news_screen.dart';
-import 'package:safeen_institute/screens/notifications_screen.dart';
-import 'package:safeen_institute/theme/app_theme.dart';
-import 'package:safeen_institute/theme/theme_provider.dart';
-import 'package:safeen_institute/services/notification_service.dart';
-import 'package:safeen_institute/services/cache_service.dart';
+import 'package:sd_institute/screens/drawer_wrapper.dart';
+import 'package:sd_institute/screens/news_screen.dart';
+import 'package:sd_institute/screens/notifications_screen.dart';
+import 'package:sd_institute/theme/app_theme.dart';
+import 'package:sd_institute/theme/theme_provider.dart';
+import 'package:sd_institute/services/notification_service.dart';
+import 'package:sd_institute/services/cache_service.dart';
+import 'package:sd_institute/services/auth_service.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 // Handle background FCM messages (runs in its own isolate)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+
+  // Extract title/body from data fields (data-only notifications)
+  final title = message.data['title']?.toString() ?? 'پەیمانگەی SD';
+  final body = message.data['body']?.toString() ?? '';
+
+  if (title.isNotEmpty || body.isNotEmpty) {
+    await NotificationService.init();
+    await NotificationService.showSystemNotification(title: title, body: body);
+  }
+}
+
+Future<void> _initFirebaseAndMessaging() async {
+  if (kIsWeb) return;
+  try {
+    // 1. Initialize Firebase
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // 2. Initialize local notifications (channel + permissions)
+    await NotificationService.init();
+
+    // 3. Request notification permission
+    final messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      criticalAlert: true,
+    );
+
+    // 4. Since we send data-only FCM messages, disable iOS auto-display
+    //    to prevent any double popup. Our onMessage handler shows the
+    //    custom in-app toast instead.
+    await messaging.setForegroundNotificationPresentationOptions(
+      alert: false,
+      badge: true,
+      sound: false,
+    );
+
+    // 5. Register FCM token
+    try {
+      final fcmToken = await messaging.getToken();
+      if (fcmToken != null) {
+        final platform = Platform.isIOS ? 'ios' : 'android';
+        NotificationService.registerToken(fcmToken, platform);
+      }
+    } catch (error) {
+      debugPrint('Unable to get FCM token: $error');
+    }
+
+    // 6. Listen for token refreshes
+    messaging.onTokenRefresh.listen((newToken) {
+      final platform = Platform.isIOS ? 'ios' : 'android';
+      NotificationService.registerToken(newToken, platform);
+    });
+
+    // 7. Foreground push handler — shows both system notification + in-app overlay
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('FCM Foreground message received: data=${message.data}, notificationTitle=${message.notification?.title}');
+      final title = message.data['title']?.toString() ??
+          message.notification?.title ??
+          'پەیمانگەی SD';
+      final body = message.data['body']?.toString() ??
+          message.notification?.body ??
+          '';
+
+      debugPrint('Processing foreground notification: title="$title", body="$body"');
+
+      if (title.isNotEmpty || body.isNotEmpty) {
+        final payload = jsonEncode({
+          'target_id': message.data['target_id'] ??
+              message.data['post_id'] ??
+              message.data['id'],
+          'target_type': message.data['target_type'],
+        });
+        NotificationService.showForegroundNotification(
+          title: title,
+          body: body,
+          payload: payload,
+        );
+      }
+    });
+
+    // 8. Handle notification tap when app was in background
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      final payload = jsonEncode({
+        'target_id': message.data['target_id'] ?? message.data['post_id'] ?? message.data['id'],
+        'target_type': message.data['target_type'],
+      });
+      NotificationService.handleTap(payload);
+    });
+  } catch (e) {
+    debugPrint('Firebase/FCM initialization failed: $e');
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  GoogleFonts.config.allowRuntimeFetching = true;
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Pre-warm the SharedPreferences cache for instant offline reads
   await CacheService.init();
 
   await NewsScreen.loadSavedNews();
 
-  // 1. Initialize Firebase
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Initialize Language Localization Provider
+  final localeProvider = LocaleProvider();
+  await localeProvider.init();
 
-  // 2. Initialize local notifications (channel + permissions)
-  await NotificationService.init();
+  // Load logged-in student session
+  await AuthService.getStudent();
 
-  // 3. Request notification permission
-  final messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-    criticalAlert: true,
-  );
-
-  // 4. Make sure foreground messages on iOS are displayed
-  await messaging.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  // 5. Setup Supabase
-  await Supabase.initialize(
-    url: 'https://ikbiagrswdbbzxwxcmkn.supabase.co',
-    anonKey: 'sb_publishable_0z4SwUSLgZTSVBsjh9mOeg_3f32RHEj',
-  );
-
-  // 6. NOW register the FCM token (Supabase is ready)
-  final fcmToken = await messaging.getToken();
-  if (fcmToken != null) {
-    final platform = Platform.isIOS ? 'ios' : 'android';
-    NotificationService.registerToken(fcmToken, platform);
-  }
-
-  // 7. Listen for token refreshes
-  messaging.onTokenRefresh.listen((newToken) {
-    final platform = Platform.isIOS ? 'ios' : 'android';
-    NotificationService.registerToken(newToken, platform);
-  });
-
-  // 8. Foreground push handler — shows both system notification + in-app overlay
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    final notification = message.notification;
-    if (notification != null) {
-      final payload = jsonEncode({
-        'target_id': message.data['target_id'] ?? message.data['post_id'] ?? message.data['id'],
-        'target_type': message.data['target_type'],
-      });
-      NotificationService.showForegroundNotification(
-        title: notification.title ?? 'Safeen Institute',
-        body: notification.body ?? '',
-        payload: payload,
-      );
-    }
-  });
-
-  // 9. Handle notification tap when app was in background
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-    final payload = jsonEncode({
-      'target_id': message.data['target_id'] ?? message.data['post_id'] ?? message.data['id'],
-      'target_type': message.data['target_type'],
-    });
-    NotificationService.handleTap(payload);
-  });
+  // Initialize Firebase and Messaging in the background without blocking the UI
+  _initFirebaseAndMessaging();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -106,17 +145,22 @@ void main() async {
     ),
   );
 
-  runApp(const SafeenInstituteApp());
+  runApp(
+    LocaleProviderInherited(
+      provider: localeProvider,
+      child: const SDInstituteApp(),
+    ),
+  );
 }
 
-class SafeenInstituteApp extends StatefulWidget {
-  const SafeenInstituteApp({super.key});
+class SDInstituteApp extends StatefulWidget {
+  const SDInstituteApp({super.key});
 
   @override
-  State<SafeenInstituteApp> createState() => _SafeenInstituteAppState();
+  State<SDInstituteApp> createState() => _SDInstituteAppState();
 }
 
-class _SafeenInstituteAppState extends State<SafeenInstituteApp> {
+class _SDInstituteAppState extends State<SDInstituteApp> {
   final _themeProvider = ThemeProvider();
 
   @override
@@ -127,10 +171,12 @@ class _SafeenInstituteAppState extends State<SafeenInstituteApp> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = LocaleProviderInherited.of(context);
+
     return ThemeProviderInherited(
       provider: _themeProvider,
       child: AnimatedBuilder(
-        animation: _themeProvider,
+        animation: Listenable.merge([_themeProvider, localeProvider]),
         builder: (context, child) {
           final isDark = _themeProvider.themeMode == ThemeMode.dark;
           SystemChrome.setSystemUIOverlayStyle(
@@ -144,7 +190,8 @@ class _SafeenInstituteAppState extends State<SafeenInstituteApp> {
           return MaterialApp(
             // Use the navigator key so NotificationService can show overlays globally
             navigatorKey: NotificationService.navigatorKey,
-            title: 'Safeen Institute',
+            title: 'SD Institute',
+            locale: localeProvider.locale,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -169,7 +216,7 @@ class _SafeenInstituteAppState extends State<SafeenInstituteApp> {
                   return Transform.scale(
                     scale: scale,
                     child: Directionality(
-                      textDirection: TextDirection.rtl,
+                      textDirection: localeProvider.textDirection,
                       child: animatedChild ?? const SizedBox(),
                     ),
                   );

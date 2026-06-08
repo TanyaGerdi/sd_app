@@ -2,9 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/institute_service.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/institute_service.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -14,12 +16,12 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  // ─── Live data with fallback defaults ───────────
-  String _instituteName = 'پەیمانگەی سەفین';
-  String _instituteTagline = 'Safeen Technical Institute';
+  // ─── Live data with fallback defaults ───
+  String _instituteName = 'پەیمانگەی SD';
+  String _instituteTagline = 'SD Technical Institute';
   final String _instituteSlogan = 'داهاتووتان بنیاد دەنێین';
   String _instituteDescription =
-      'پەیمانگەی سەفین بۆ خزمەتگوزاری خوێندنی باڵا و پێگەیاندنی کادری ئەکادیمی هونەری بە فەرمانی وزاری خوێندنی باڵا دامەزراوە.\n\nئامانجمان پێگەیاندنی نەوەیەکی هۆشیار و زانستخوازە کە بتوانن خزمەت بە کۆمەڵگە بکەن وەک سەرکردەی داهاتوو.';
+      'پەیمانگەی SD بۆ خوێندنی تەکنیکی و پیشەیی و پێگەیاندنی کادری ئەکادیمی و پیشەیی بەرز بە فەرمانی فەرمی دامەزراوە.\n\nئامانجمان پێگەیاندنی نەوەیەکی هۆشیار و لێهاتوو و زانستخوازە کە بتوانن خزمەت بە بازاڕی کار و کۆمەڵگە بکەن.';
 
   String _statsDepartments = '٦';
   String _statsTeachers = '+٣٠';
@@ -27,10 +29,10 @@ class _AboutScreenState extends State<AboutScreen> {
 
   String _contactLocation = 'هەولێر، کوردستان';
   String _contactPhone = '+964 750 000 0000';
-  String _contactEmail = 'info@safeen.edu.krd';
-  String _contactWebsite = 'www.safeen.edu.krd';
+  String _contactEmail = 'info@sd.edu.krd';
+  String _contactWebsite = 'www.sd.edu.krd';
 
-  String _weekdayHours = '۸:۰۰ — ۳:۰۰';
+  String _weekdayHours = '٨:٠٠ — ٣:٠٠';
   String _weekendHours = 'پشوو';
   String _weekdayLabel = 'یەکشەممە — پێنجشەممە';
   String _weekendLabel = 'هەینی — شەممە';
@@ -74,8 +76,12 @@ class _AboutScreenState extends State<AboutScreen> {
         final sStud = (stats['students_count'] ?? '').toString().trim();
 
         _statsDepartments = sDept.isNotEmpty ? sDept : _statsDepartments;
-        _statsTeachers = sTeach.isNotEmpty ? (sTeach == '0' ? '0' : '+$sTeach') : _statsTeachers;
-        _statsStudents = sStud.isNotEmpty ? (sStud == '0' ? '0' : '+$sStud') : _statsStudents;
+        _statsTeachers = sTeach.isNotEmpty
+            ? (sTeach == '0' ? '0' : '+$sTeach')
+            : _statsTeachers;
+        _statsStudents = sStud.isNotEmpty
+            ? (sStud == '0' ? '0' : '+$sStud')
+            : _statsStudents;
       }
       if (contact.isNotEmpty) {
         final cLoc = (contact['location'] ?? '').toString().trim();
@@ -102,18 +108,43 @@ class _AboutScreenState extends State<AboutScreen> {
     });
   }
 
+  String getLocalizedWeekendHours(String lang) {
+    if (lang == 'en') return 'Holiday';
+    if (lang == 'ar') return 'عطلة';
+    return 'پشوو';
+  }
+
+  String getLocalizedWeekdayLabel(String lang) {
+    if (lang == 'en') return 'Sunday — Thursday';
+    if (lang == 'ar') return 'الأحد — الخميس';
+    return 'یەکشەممە — پێنجشەممە';
+  }
+
+  String getLocalizedWeekendLabel(String lang) {
+    if (lang == 'en') return 'Friday — Saturday';
+    if (lang == 'ar') return 'الجمعة — السبت';
+    return 'هەینی — شەممە';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final canGoBack = Navigator.canPop(context);
     final size = MediaQuery.of(context).size;
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
+    final lang = localeProvider.language.name;
+
+    final displayWeekdayLabel = _weekdayLabel == 'یەکشەممە — پێنجشەممە' ? getLocalizedWeekdayLabel(lang) : _weekdayLabel;
+    final displayWeekendLabel = _weekendLabel == 'هەینی — شەممە' ? getLocalizedWeekendLabel(lang) : _weekendLabel;
+    final displayWeekendHours = _weekendHours == 'پشوو' ? getLocalizedWeekendHours(lang) : _weekendHours;
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF040405)
-            : const Color(0xFFF9FAFB),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Ambient Aura Meshes
@@ -209,7 +240,7 @@ class _AboutScreenState extends State<AboutScreen> {
                             if (canGoBack) const SizedBox(width: 16),
                             Expanded(
                               child: Text(
-                                'دەربارەی ئێمە',
+                                localizations.get('about_title'),
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.w900,
@@ -242,13 +273,13 @@ class _AboutScreenState extends State<AboutScreen> {
                                         end: Alignment.bottomRight,
                                         colors: isDark
                                             ? [
-                                                const Color(0xFF1A2744),
-                                                const Color(0xFF0E1A30),
+                                                const Color(0xFF1A1A2E),
+                                                const Color(0xFF0E0E1A),
                                               ]
                                             : [
                                                 AppColors.primary,
                                                 AppColors.primary.withValues(
-                                                  alpha: 0.8,
+                                                  alpha: 0.85,
                                                 ),
                                               ],
                                       ),
@@ -271,10 +302,13 @@ class _AboutScreenState extends State<AboutScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              child: const Icon(
-                                                Icons.school_rounded,
-                                                size: 48,
-                                                color: Colors.white,
+                                              child: ClipOval(
+                                                child: Image.asset(
+                                                  'assets/img/sd_logo.png',
+                                                  width: 80,
+                                                  height: 80,
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
                                             )
                                             .animate(
@@ -296,6 +330,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                             fontWeight: FontWeight.w900,
                                             letterSpacing: -0.5,
                                           ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
@@ -308,6 +345,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                             letterSpacing: 2,
                                             fontWeight: FontWeight.w600,
                                           ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 12),
                                         Container(
@@ -330,6 +370,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                             ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
                                           ),
                                         ),
                                       ],
@@ -376,8 +419,9 @@ class _AboutScreenState extends State<AboutScreen> {
                             _buildStatCard(
                               context,
                               isDark,
+                              Icons.school_rounded,
                               _statsDepartments,
-                              'بەش',
+                              localizations.get('departments'),
                               const Color(0xFF5B8DEF),
                               200,
                             ),
@@ -385,8 +429,9 @@ class _AboutScreenState extends State<AboutScreen> {
                             _buildStatCard(
                               context,
                               isDark,
+                              Icons.groups_rounded,
                               _statsTeachers,
-                              'مامۆستا',
+                              localizations.get('teachers_count'),
                               const Color(0xFFE8985E),
                               300,
                             ),
@@ -394,8 +439,9 @@ class _AboutScreenState extends State<AboutScreen> {
                             _buildStatCard(
                               context,
                               isDark,
+                              Icons.person_rounded,
                               _statsStudents,
-                              'خوێندکار',
+                              localizations.get('students_count'),
                               const Color(0xFF48C78E),
                               400,
                             ),
@@ -414,7 +460,7 @@ class _AboutScreenState extends State<AboutScreen> {
                               _buildCardTitle(
                                 context,
                                 isDark,
-                                'چیرۆکی ئێمە',
+                                localizations.get('our_story'),
                                 AppColors.secondary,
                               ),
                               const SizedBox(height: 20),
@@ -446,7 +492,7 @@ class _AboutScreenState extends State<AboutScreen> {
                               _buildCardTitle(
                                 context,
                                 isDark,
-                                'زانیاری پەیوەندی',
+                                localizations.get('contact_info'),
                                 AppColors.accent,
                               ),
                               const SizedBox(height: 24),
@@ -484,7 +530,8 @@ class _AboutScreenState extends State<AboutScreen> {
                                 Icons.language_rounded,
                                 _contactWebsite,
                                 const Color(0xFFA55EEA),
-                                onTap: () => _openUrl('https://$_contactWebsite'),
+                                onTap: () =>
+                                    _openUrl('https://$_contactWebsite'),
                               ),
                             ],
                           ),
@@ -503,22 +550,22 @@ class _AboutScreenState extends State<AboutScreen> {
                               _buildCardTitle(
                                 context,
                                 isDark,
-                                'کاتژمێری کارکردن',
+                                localizations.get('working_hours'),
                                 const Color(0xFF48C78E),
                               ),
                               const SizedBox(height: 24),
                               _buildHourRow(
                                 context,
                                 isDark,
-                                _weekdayLabel,
+                                displayWeekdayLabel,
                                 _weekdayHours,
                               ),
                               const SizedBox(height: 16),
                               _buildHourRow(
                                 context,
                                 isDark,
-                                _weekendLabel,
-                                _weekendHours,
+                                displayWeekendLabel,
+                                displayWeekendHours,
                                 isOff: true,
                               ),
                             ],
@@ -530,44 +577,44 @@ class _AboutScreenState extends State<AboutScreen> {
 
                         // Social Row
                         Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildSocialIcon(
-                                  context,
-                                  isDark,
-                                  Icons.facebook,
-                                  const Color(0xFF1877F2),
-                                  'https://facebook.com/safeeninstitute',
-                                ),
-                                const SizedBox(width: 16),
-                                _buildSocialIcon(
-                                  context,
-                                  isDark,
-                                  Icons.camera_alt_rounded,
-                                  const Color(0xFFE4405F),
-                                  'https://instagram.com/safeeninstitute',
-                                ),
-                                const SizedBox(width: 16),
-                                _buildSocialIcon(
-                                  context,
-                                  isDark,
-                                  Icons.play_arrow_rounded,
-                                  isDark ? Colors.white : Colors.black87,
-                                  'https://tiktok.com/@safeeninstitute',
-                                ),
-                                const SizedBox(width: 16),
-                                _buildSocialIcon(
-                                  context,
-                                  isDark,
-                                  Icons.telegram,
-                                  const Color(0xFF0088CC),
-                                  'https://t.me/safeeninstitute',
-                                ),
-                              ],
-                            )
-                            .animate()
-                            .fadeIn(delay: 800.ms, duration: 600.ms)
-                            .slideY(begin: 0.2, curve: Curves.easeOutCirc),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildSocialIcon(
+                              context,
+                              isDark,
+                              Icons.facebook,
+                              const Color(0xFF1877F2),
+                              'https://facebook.com/sdinstitute',
+                            ),
+                            const SizedBox(width: 16),
+                            _buildSocialIcon(
+                              context,
+                              isDark,
+                              Icons.camera_alt_rounded,
+                              const Color(0xFFE4405F),
+                              'https://instagram.com/sdinstitute',
+                            ),
+                            const SizedBox(width: 16),
+                            _buildSocialIcon(
+                              context,
+                              isDark,
+                              Icons.play_arrow_rounded,
+                              isDark ? Colors.white : Colors.black87,
+                              'https://tiktok.com/@sdinstitute',
+                            ),
+                            const SizedBox(width: 16),
+                            _buildSocialIcon(
+                              context,
+                              isDark,
+                              Icons.telegram,
+                              const Color(0xFF0088CC),
+                              'https://t.me/sdinstitute',
+                            ),
+                          ],
+                        )
+                        .animate()
+                        .fadeIn(delay: 800.ms, duration: 600.ms)
+                        .slideY(begin: 0.2, curve: Curves.easeOutCirc),
                       ],
                     ),
                   ),
@@ -604,34 +651,26 @@ class _AboutScreenState extends State<AboutScreen> {
     required Widget child,
     required int delay,
   }) {
-    return Container(
+    return ClayContainer(
           width: double.infinity,
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF141822).withValues(alpha: 0.7)
-                : Colors.white.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.03),
-              width: 1.5,
+          borderRadius: 28,
+          depth: 12,
+          color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
+          padding: const EdgeInsets.all(26),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: isDark ? 0.03 : 0.14),
+                  Colors.transparent,
+                  AppColors.primary.withValues(alpha: isDark ? 0.03 : 0.04),
+                ],
+              ),
             ),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
-                ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Padding(padding: const EdgeInsets.all(28), child: child),
-            ),
+            child: child,
           ),
         )
         .animate()
@@ -665,13 +704,17 @@ class _AboutScreenState extends State<AboutScreen> {
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .shimmer(duration: 2.seconds, color: Colors.white),
         const SizedBox(width: 16),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            color: isDark ? Colors.white : const Color(0xFF111827),
-            letterSpacing: -0.3,
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: isDark ? Colors.white : const Color(0xFF111827),
+              letterSpacing: -0.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -681,6 +724,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Widget _buildStatCard(
     BuildContext context,
     bool isDark,
+    IconData icon,
     String value,
     String label,
     Color color,
@@ -691,28 +735,48 @@ class _AboutScreenState extends State<AboutScreen> {
           _InteractiveGlassCard(
                 isDark: isDark,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 8,
+                  ),
                   child: Column(
                     children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: isDark ? 0.18 : 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: color.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Icon(icon, color: color, size: 20),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         value,
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w900,
                           color: color,
                           letterSpacing: -1,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
                       Text(
                         label,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: isDark
                               ? Colors.white60
                               : const Color(0xFF6B7280),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -764,6 +828,8 @@ class _AboutScreenState extends State<AboutScreen> {
                 color: isDark ? Colors.white : const Color(0xFF111827),
                 fontWeight: FontWeight.w600,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (copyable)
@@ -799,14 +865,19 @@ class _AboutScreenState extends State<AboutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          day,
-          style: TextStyle(
-            fontSize: 15,
-            color: isDark ? Colors.white70 : const Color(0xFF4B5563),
-            fontWeight: FontWeight.w600,
+        Expanded(
+          child: Text(
+            day,
+            style: TextStyle(
+              fontSize: 15,
+              color: isDark ? Colors.white70 : const Color(0xFF4B5563),
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SizedBox(width: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
@@ -833,7 +904,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // ─── URL Launcher Helpers ───────────────────────
+  // ─── URL Launcher Helpers ─────────────────────────────────────────────
   Future<void> _makeCall(String phone) async {
     final cleaned = phone.replaceAll(RegExp(r'[^0-9+]'), '');
     final uri = Uri.parse('tel:$cleaned');
@@ -851,7 +922,9 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Future<void> _openMaps(String location) async {
     final encoded = Uri.encodeComponent(location);
-    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encoded');
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$encoded',
+    );
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {}
@@ -912,34 +985,15 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard> {
         scale: _isPressed ? 0.94 : 1.0,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        child: Container(
-          decoration: BoxDecoration(
-            color: widget.isDark
-                ? const Color(0xFF1C1C1E).withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: widget.isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.black.withValues(alpha: 0.05),
-              width: 1.5,
-            ),
-            boxShadow: [
-              if (!widget.isDark)
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: widget.child,
-            ),
-          ),
+        child: ClayContainer(
+          borderRadius: 24,
+          depth: _isPressed ? 4 : 10,
+          spread: _isPressed ? 0 : 2,
+          emboss: _isPressed,
+          color: widget.isDark
+              ? const Color(0xFF1E1E24)
+              : const Color(0xFFE8EAF0),
+          child: widget.child,
         ),
       ),
     );

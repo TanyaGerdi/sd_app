@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/schedule_service.dart';
-import 'package:safeen_institute/widgets/cached_image.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/schedule_service.dart';
+import 'package:sd_institute/widgets/cached_image.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ⚠️  Add this to pubspec.yaml before running:
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// âš ï¸  Add this to pubspec.yaml before running:
 //       flutter_pdfview: ^1.3.2
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -69,7 +70,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   List<Color> _gradientForIndex(int i) =>
       _cardGradients[i % _cardGradients.length];
 
-  /// Opens the file entirely within the app — no external browser or launchUrl.
+  /// Opens the file entirely within the app â€” no external browser or launchUrl.
   void _openInApp(BuildContext context, String url, String title, int index) {
     if (url.isEmpty) return;
     HapticFeedback.mediumImpact();
@@ -157,9 +158,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Cosmic animated background
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _CosmicBackground extends StatelessWidget {
   final bool isDark;
   final AnimationController pulseController;
@@ -178,13 +179,13 @@ class _CosmicBackground extends StatelessWidget {
     return Positioned.fill(
       child: Stack(
         children: [
-          // Large pulsing orb – top right
+          // Large pulsing orb â€“ top right
           Positioned(
             top: -size.width * 0.3,
             right: -size.width * 0.2,
             child: AnimatedBuilder(
               animation: pulseController,
-              builder: (_, __) => Container(
+              builder: (_, _) => Container(
                 width: size.width * 0.9,
                 height: size.width * 0.9,
                 decoration: BoxDecoration(
@@ -203,13 +204,13 @@ class _CosmicBackground extends StatelessWidget {
               ),
             ),
           ),
-          // Medium pulsing orb – bottom left
+          // Medium pulsing orb â€“ bottom left
           Positioned(
             bottom: -size.width * 0.2,
             left: -size.width * 0.2,
             child: AnimatedBuilder(
               animation: pulseController,
-              builder: (_, __) => Container(
+              builder: (_, _) => Container(
                 width: size.width * 0.75,
                 height: size.width * 0.75,
                 decoration: BoxDecoration(
@@ -234,7 +235,7 @@ class _CosmicBackground extends StatelessWidget {
             right: -size.width * 0.15,
             child: AnimatedBuilder(
               animation: rotateController,
-              builder: (_, __) => Transform.rotate(
+              builder: (_, _) => Transform.rotate(
                 angle: rotateController.value * 2 * math.pi,
                 child: Container(
                   width: size.width * 0.5,
@@ -258,7 +259,7 @@ class _CosmicBackground extends StatelessWidget {
             left: -size.width * 0.1,
             child: AnimatedBuilder(
               animation: rotateController,
-              builder: (_, __) => Transform.rotate(
+              builder: (_, _) => Transform.rotate(
                 angle: -rotateController.value * 2 * math.pi,
                 child: Container(
                   width: size.width * 0.35,
@@ -288,9 +289,9 @@ class _CosmicBackground extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Header
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _Header extends StatelessWidget {
   final bool isDark;
   const _Header({required this.isDark});
@@ -302,39 +303,13 @@ class _Header extends StatelessWidget {
       child:
           Row(
                 children: [
-                  GestureDetector(
+                  ClayIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    size: 46,
+                    iconSize: 18,
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
                     },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                        child: Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.white.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.12)
-                                  : Colors.black.withValues(alpha: 0.07),
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 17,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -380,9 +355,9 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Schedule list
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ScheduleList extends StatelessWidget {
   final List<Map<String, dynamic>> schedules;
   final bool isDark;
@@ -426,9 +401,9 @@ class _ScheduleList extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Premium glassmorphic schedule card
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ScheduleCard extends StatefulWidget {
   final int index;
   final String deptName;
@@ -486,223 +461,194 @@ class _ScheduleCardState extends State<_ScheduleCard> {
                 scale: _pressed ? 0.97 : 1.0,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutBack,
-                child: Container(
+                child: ClayContainer(
                   margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: c1.withValues(
-                          alpha: widget.isDark ? 0.22 : 0.13,
-                        ),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                        spreadRadius: -4,
-                      ),
-                    ],
-                  ),
+                  borderRadius: 28,
+                  depth: _pressed ? 5 : 14,
+                  spread: _pressed ? 0 : 2,
+                  emboss: _pressed,
+                  color: widget.isDark
+                      ? const Color(0xFF1E1E24)
+                      : const Color(0xFFE8EAF0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(28),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: widget.isDark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.white.withValues(alpha: 0.88),
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: widget.isDark
-                                ? Colors.white.withValues(alpha: 0.1)
-                                : c1.withValues(alpha: 0.15),
-                            width: 1.5,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Card header
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                c1.withValues(alpha: 0.12),
+                                c2.withValues(alpha: 0.04),
+                              ],
+                            ),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(28),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              // Glowing gradient icon
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [c1, c2],
+                                  ),
+                                  borderRadius: BorderRadius.circular(17),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: c1.withValues(alpha: 0.55),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 7),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.table_chart_rounded,
+                                  color: Colors.white,
+                                  size: 27,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.deptName,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.3,
+                                        height: 1.3,
+                                        color: widget.isDark
+                                            ? Colors.white
+                                            : const Color(0xFF0F0F23),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Wrap(
+                                      spacing: 6,
+                                      children: [
+                                        if (widget.semester.isNotEmpty)
+                                          _Pill(
+                                            text: widget.semester,
+                                            color: c1,
+                                            isDark: widget.isDark,
+                                          ),
+                                        if (widget.year.isNotEmpty)
+                                          _Pill(
+                                            text: widget.year,
+                                            color: c2,
+                                            isDark: widget.isDark,
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // File type indicator
+                              Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      c1.withValues(alpha: 0.18),
+                                      c2.withValues(alpha: 0.08),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(11),
+                                  border: Border.all(
+                                    color: c1.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Icon(
+                                  _isImageUrl
+                                      ? Icons.image_search_rounded
+                                      : Icons.picture_as_pdf_rounded,
+                                  color: c1,
+                                  size: 19,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Card header
+
+                        // Preview area
+                        if (widget.fileUrl.isNotEmpty) ...[
+                          if (_isImageUrl)
+                            Hero(
+                              tag: 'schedule_img_${widget.index}',
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  bottom: Radius.circular(28),
+                                ),
+                                child: CachedImage(
+                                  imageUrl: widget.fileUrl,
+                                  height: 230,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          else
                             Container(
-                              padding: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  begin: Alignment.topRight,
-                                  end: Alignment.bottomLeft,
                                   colors: [
-                                    c1.withValues(alpha: 0.12),
+                                    c1.withValues(alpha: 0.1),
                                     c2.withValues(alpha: 0.04),
                                   ],
                                 ),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(28),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: c1.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  // Glowing gradient icon
-                                  Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [c1, c2],
-                                      ),
-                                      borderRadius: BorderRadius.circular(17),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: c1.withValues(alpha: 0.55),
-                                          blurRadius: 18,
-                                          offset: const Offset(0, 7),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.table_chart_rounded,
-                                      color: Colors.white,
-                                      size: 27,
-                                    ),
+                                  Icon(
+                                    Icons.picture_as_pdf_rounded,
+                                    color: c1,
+                                    size: 22,
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          widget.deptName,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: -0.3,
-                                            height: 1.3,
-                                            color: widget.isDark
-                                                ? Colors.white
-                                                : const Color(0xFF0F0F23),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Wrap(
-                                          spacing: 6,
-                                          children: [
-                                            if (widget.semester.isNotEmpty)
-                                              _Pill(
-                                                text: widget.semester,
-                                                color: c1,
-                                                isDark: widget.isDark,
-                                              ),
-                                            if (widget.year.isNotEmpty)
-                                              _Pill(
-                                                text: widget.year,
-                                                color: c2,
-                                                isDark: widget.isDark,
-                                              ),
-                                          ],
-                                        ),
-                                      ],
+                                    child: Text(
+                                      'تێبکە بۆ بینینی تەواوەکەی',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: widget.isDark
+                                            ? Colors.white70
+                                            : const Color(0xFF374151),
+                                      ),
                                     ),
                                   ),
-                                  // File type indicator
-                                  Container(
-                                    width: 38,
-                                    height: 38,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          c1.withValues(alpha: 0.18),
-                                          c2.withValues(alpha: 0.08),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(11),
-                                      border: Border.all(
-                                        color: c1.withValues(alpha: 0.3),
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      _isImageUrl
-                                          ? Icons.image_search_rounded
-                                          : Icons.picture_as_pdf_rounded,
-                                      color: c1,
-                                      size: 19,
-                                    ),
+                                  Icon(
+                                    Icons.chevron_left_rounded,
+                                    color: c1.withValues(alpha: 0.7),
+                                    size: 20,
                                   ),
                                 ],
                               ),
                             ),
-
-                            // Preview area
-                            if (widget.fileUrl.isNotEmpty) ...[
-                              if (_isImageUrl)
-                                Hero(
-                                  tag: 'schedule_img_${widget.index}',
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      bottom: Radius.circular(28),
-                                    ),
-                                    child: CachedImage(
-                                      imageUrl: widget.fileUrl,
-                                      height: 230,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                )
-                              else
-                                Container(
-                                  margin: const EdgeInsets.fromLTRB(
-                                    16,
-                                    0,
-                                    16,
-                                    16,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        c1.withValues(alpha: 0.1),
-                                        c2.withValues(alpha: 0.04),
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: c1.withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.picture_as_pdf_rounded,
-                                        color: c1,
-                                        size: 22,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'تێبکە بۆ بینینی تەواوەکەی',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            color: widget.isDark
-                                                ? Colors.white70
-                                                : const Color(0xFF374151),
-                                          ),
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.chevron_left_rounded,
-                                        color: c1.withValues(alpha: 0.7),
-                                        size: 20,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ],
-                        ),
-                      ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -723,9 +669,9 @@ class _ScheduleCardState extends State<_ScheduleCard> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Colored pill badge
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _Pill extends StatelessWidget {
   final String text;
   final Color color;
@@ -753,9 +699,9 @@ class _Pill extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Shimmer loading
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _LoadingShimmer extends StatefulWidget {
   final bool isDark;
   const _LoadingShimmer({required this.isDark});
@@ -790,7 +736,7 @@ class _LoadingShimmerState extends State<_LoadingShimmer>
       itemCount: 4,
       itemBuilder: (_, i) => AnimatedBuilder(
         animation: _c,
-        builder: (_, __) => Container(
+        builder: (_, _) => Container(
           margin: const EdgeInsets.only(bottom: 20),
           height: 260,
           decoration: BoxDecoration(
@@ -817,9 +763,9 @@ class _LoadingShimmerState extends State<_LoadingShimmer>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Empty state
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _EmptyState extends StatelessWidget {
   final bool isDark;
   const _EmptyState({required this.isDark});
@@ -867,9 +813,9 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // In-app image viewer (cinematic, swipe-to-dismiss, pinch-to-zoom)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _InAppImageViewer extends StatefulWidget {
   final String imageUrl;
   final String heroTag;
@@ -967,10 +913,10 @@ class _InAppImageViewerState extends State<_InAppImageViewer> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // In-app PDF viewer
 // Requires:  flutter_pdfview: ^1.3.2  in pubspec.yaml
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _InAppPdfViewer extends StatefulWidget {
   final String url;
   final String title;
@@ -1091,7 +1037,7 @@ class _InAppPdfViewerState extends State<_InAppPdfViewer> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'فایلەکە دابەزێنراودەێت...',
+                      'فایلەکە دادەبەزێندرێت...',
                       style: TextStyle(
                         color: isDark ? Colors.white60 : Colors.black45,
                         fontSize: 14,
@@ -1128,9 +1074,9 @@ class _InAppPdfViewerState extends State<_InAppPdfViewer> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ——————————————————————————————————————————————————————————————————————————
 // Error view
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ErrorView extends StatelessWidget {
   final bool isDark;
   final String error;

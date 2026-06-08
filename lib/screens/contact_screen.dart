@@ -2,9 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:safeen_institute/theme/app_colors.dart';
-import 'package:safeen_institute/services/institute_service.dart';
+import 'package:sd_institute/theme/app_colors.dart';
+import 'package:sd_institute/services/institute_service.dart';
+import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
@@ -16,7 +18,7 @@ class ContactScreen extends StatefulWidget {
 class _ContactScreenState extends State<ContactScreen> {
   String _location = 'هەولێر - کوردستان\nنزیک شەقامی سەرەکی';
   String _phone = '0750 971 4545';
-  String _email = 'info@safeen.edu.krd';
+  String _email = 'info@sd.edu.krd';
   List<Map<String, dynamic>> _socialLinks = [];
   bool _loadingSocial = true;
 
@@ -44,7 +46,8 @@ class _ContactScreenState extends State<ContactScreen> {
       // Explicitly filter out WhatsApp and ensure list is from DB
       _socialLinks = socials.where((s) {
         final platform = (s['platform'] ?? '').toString().toLowerCase();
-        return !platform.contains('whatsapp') && !platform.contains('whats_app');
+        return !platform.contains('whatsapp') &&
+            !platform.contains('whats_app');
       }).toList();
       _loadingSocial = false;
     });
@@ -54,13 +57,15 @@ class _ContactScreenState extends State<ContactScreen> {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final size = MediaQuery.of(context).size;
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
-            ? const Color(0xFF070709)
-            : const Color(0xFFF4F6F9),
+            ? const Color(0xFF000000)
+            : const Color(0xFFF2F2F7),
         body: Stack(
           children: [
             // Atmospheric Background Orbs
@@ -149,7 +154,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
                         // Title
                         Text(
-                              'پەیوەندیمان\nپێوە بکە',
+                              localizations.get('contact_title'),
                               style: TextStyle(
                                 fontSize: 42,
                                 fontWeight: FontWeight.w900,
@@ -167,12 +172,12 @@ class _ContactScreenState extends State<ContactScreen> {
                         const SizedBox(height: 40),
 
                         // Hero Panel
-                        _buildHeroPanel(context, isDark),
+                        _buildHeroPanel(context, isDark, localizations),
 
                         const SizedBox(height: 40),
 
                         Text(
-                          'ڕێگاکانی پەیوەندی',
+                          localizations.get('contact_info'),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -189,7 +194,7 @@ class _ContactScreenState extends State<ContactScreen> {
                           isDark: isDark,
                           icon: Icons.map_rounded,
                           iconColor: const Color(0xFFF59E0B),
-                          title: 'ناونیشان',
+                          title: localizations.get('address'),
                           subtitle: _location,
                           fullWidth: true,
                           delay: 400,
@@ -203,7 +208,7 @@ class _ContactScreenState extends State<ContactScreen> {
                                 isDark: isDark,
                                 icon: Icons.phone_in_talk_rounded,
                                 iconColor: const Color(0xFF10B981),
-                                title: 'تەلەفۆن',
+                                title: localizations.get('phone'),
                                 subtitle: _phone,
                                 fullWidth: false,
                                 delay: 500,
@@ -216,7 +221,7 @@ class _ContactScreenState extends State<ContactScreen> {
                                 isDark: isDark,
                                 icon: Icons.alternate_email_rounded,
                                 iconColor: const Color(0xFF3B82F6),
-                                title: 'ئیمەیڵ',
+                                title: localizations.get('email'),
                                 subtitle: _email,
                                 fullWidth: false,
                                 delay: 600,
@@ -231,7 +236,7 @@ class _ContactScreenState extends State<ContactScreen> {
                         // ── Social Media Section ──────────────────────────
                         if (_loadingSocial || _socialLinks.isNotEmpty) ...[
                           Text(
-                            'تۆڕە کۆمەڵایەتییەکان',
+                            localizations.get('social_media'),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -253,7 +258,7 @@ class _ContactScreenState extends State<ContactScreen> {
                                 physics: const BouncingScrollPhysics(),
                                 clipBehavior: Clip.none,
                                 itemCount: _socialLinks.length,
-                                separatorBuilder: (_, __) =>
+                                separatorBuilder: (_, _) =>
                                     const SizedBox(width: 20),
                                 itemBuilder: (context, index) {
                                   final social = _socialLinks[index];
@@ -286,7 +291,7 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  // ─── Skeleton loader for social orbs ──────────────────────────────────────
+  // ─── Skeleton loader for social orbs ──────────────────────────────────
   Widget _buildSocialSkeleton(bool isDark) {
     return SizedBox(
       height: 90,
@@ -294,8 +299,8 @@ class _ContactScreenState extends State<ContactScreen> {
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: 3,
-        separatorBuilder: (_, __) => const SizedBox(width: 20),
-        itemBuilder: (_, __) =>
+        separatorBuilder: (_, _) => const SizedBox(width: 20),
+        itemBuilder: (_, _) =>
             Container(
                   width: 76,
                   height: 76,
@@ -312,7 +317,7 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  // ─── Platform → Icon mapping ───────────────────────────────────────────────
+  // ─── Platform → Icon mapping ───────────────────────────────────────────
   IconData _getPlatformIcon(String platform) {
     final p = platform.toLowerCase();
     if (p.contains('facebook') || p.contains('fb')) {
@@ -334,7 +339,7 @@ class _ContactScreenState extends State<ContactScreen> {
     }
   }
 
-  // ─── Platform → Color mapping ──────────────────────────────────────────────
+  // ─── Platform → Color mapping ─────────────────────────────────────────
   Color _getPlatformColor(String platform) {
     final p = platform.toLowerCase();
     if (p.contains('facebook') || p.contains('fb')) {
@@ -374,7 +379,7 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  Widget _buildHeroPanel(BuildContext context, bool isDark) {
+  Widget _buildHeroPanel(BuildContext context, bool isDark, AppLocalizations localizations) {
     return Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -455,7 +460,7 @@ class _ContactScreenState extends State<ContactScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ئێمە لێرەین',
+                            localizations.get('we_are_here'),
                             style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -466,7 +471,7 @@ class _ContactScreenState extends State<ContactScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'بە خێرایی وەڵامی پرسیارەکانت دەدەینەوە',
+                            localizations.get('fast_response'),
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.6,
@@ -490,7 +495,7 @@ class _ContactScreenState extends State<ContactScreen> {
         .scaleXY(begin: 0.95, duration: 800.ms, curve: Curves.easeOutExpo);
   }
 
-  // ─── URL Launcher Helpers ────────────────────────────────────────────────
+  // ─── URL Launcher Helpers ──────────────────────────────────────────────────
   Future<void> _makeCall(String phone) async {
     final cleaned = phone.replaceAll(RegExp(r'[^0-9+]'), '');
     try {
@@ -539,7 +544,7 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 }
 
-// ─── Interactive Glass Card ────────────────────────────────────────────────────
+// ─── Interactive Glass Card ──────────────────────────────────────────────────────
 class _InteractiveGlassCard extends StatefulWidget {
   final bool isDark;
   final IconData icon;
@@ -584,90 +589,43 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard> {
             scale: _isPressed ? 0.93 : 1.0,
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            child: Container(
+            child: ClayContainer(
               width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  if (_isPressed)
-                    BoxShadow(
-                      color: widget.iconColor.withValues(alpha: 0.3),
-                      blurRadius: 25,
-                      spreadRadius: 2,
+              borderRadius: 28,
+              depth: _isPressed ? 5 : 12,
+              emboss: _isPressed,
+              color: widget.isDark
+                  ? const Color(0xFF1E1E24)
+                  : const Color(0xFFE8EAF0),
+              padding: EdgeInsets.all(widget.fullWidth ? 26 : 22),
+              child: widget.fullWidth
+                  ? Row(
+                      children: [
+                        _buildIconBox(),
+                        const SizedBox(width: 20),
+                        Expanded(child: _buildTextContent()),
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: widget.isDark
+                              ? Colors.white30
+                              : Colors.black26,
+                        ),
+                      ],
                     )
-                  else if (!widget.isDark)
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildIconBox(),
+                        const SizedBox(height: 24),
+                        _buildTextContent(),
+                      ],
                     ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: EdgeInsets.all(widget.fullWidth ? 28 : 24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: widget.isDark
-                            ? [
-                                Colors.white.withValues(
-                                  alpha: _isPressed ? 0.08 : 0.04,
-                                ),
-                                Colors.white.withValues(alpha: 0.01),
-                              ]
-                            : [
-                                Colors.white.withValues(
-                                  alpha: _isPressed ? 0.9 : 0.7,
-                                ),
-                                Colors.white.withValues(alpha: 0.4),
-                              ],
-                      ),
-                      border: Border.all(
-                        color: _isPressed
-                            ? widget.iconColor.withValues(alpha: 0.6)
-                            : Colors.white.withValues(
-                                alpha: widget.isDark ? 0.08 : 0.6,
-                              ),
-                        width: _isPressed ? 2 : 1,
-                      ),
-                    ),
-                    child: widget.fullWidth
-                        ? Row(
-                            children: [
-                              _buildIconBox(),
-                              const SizedBox(width: 20),
-                              Expanded(child: _buildTextContent()),
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 16,
-                                color: widget.isDark
-                                    ? Colors.white30
-                                    : Colors.black26,
-                              ),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildIconBox(),
-                              const SizedBox(height: 24),
-                              _buildTextContent(),
-                            ],
-                          ),
-                  ),
-                ),
-              ),
             ),
           ),
         )
         .animate()
-        .fadeIn(delay: widget.delay.ms, duration: 600.ms)
+        .fadeIn(delay: widget.delay.ms)
         .slideY(begin: 0.15, curve: Curves.easeOutCubic);
   }
 
@@ -713,7 +671,7 @@ class _InteractiveGlassCardState extends State<_InteractiveGlassCard> {
   }
 }
 
-// ─── Interactive Social Orb ────────────────────────────────────────────────────
+// ─── Interactive Social Orb ──────────────────────────────────────────────────────
 class _InteractiveSocialOrb extends StatefulWidget {
   final bool isDark;
   final IconData icon;
