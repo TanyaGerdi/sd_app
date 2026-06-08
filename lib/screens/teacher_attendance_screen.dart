@@ -28,6 +28,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     _loadStudents();
   }
 
+  bool _isEditing = false;
+
   Future<void> _loadStudents() async {
     setState(() {
       _isLoading = true;
@@ -44,19 +46,49 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         throw Exception('No department assigned to this teacher.');
       }
 
+      // 1. Fetch Students
       final response = await ApiService.get(
         '/students',
         queryParams: {'department_id': deptId},
       );
-
       final list = List<dynamic>.from(response);
+
+      // 2. Fetch existing attendance for the selected date
+      final dateStr = intl.DateFormat('yyyy-MM-dd').format(_selectedDate);
+      List<dynamic> attendanceList = [];
+      try {
+        final attendanceResponse = await ApiService.get(
+          '/attendance',
+          queryParams: {'date': dateStr},
+        );
+        attendanceList = List<dynamic>.from(attendanceResponse);
+      } catch (e) {
+        debugPrint('No attendance recorded yet or error fetching: $e');
+      }
+
+      bool hasExisting = false;
+      final tempMap = <int, String>{};
+      for (var student in list) {
+        final id = student['id'] as int;
+        
+        final existingRecord = attendanceList.firstWhere(
+          (a) => a['student_id']?.toString() == id.toString(),
+          orElse: () => null,
+        );
+
+        if (existingRecord != null && existingRecord['status'] != null) {
+          tempMap[id] = existingRecord['status'].toString();
+          hasExisting = true;
+        } else {
+          tempMap[id] = 'present';
+        }
+      }
+
       setState(() {
         _students = list;
-        for (var student in list) {
-          final id = student['id'] as int;
-          // Default to present
-          _attendanceMap[id] = 'present';
-        }
+        _attendanceMap.clear();
+        _attendanceMap.addAll(tempMap);
+        _isEditing = hasExisting;
         _isLoading = false;
       });
     } catch (e) {
@@ -71,7 +103,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2025),
+      firstDate: DateTime.now().subtract(const Duration(days: 7)),
       lastDate: DateTime.now(),
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -92,6 +124,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       setState(() {
         _selectedDate = picked;
       });
+      _loadStudents();
     }
   }
 
@@ -603,9 +636,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text(
-                      'Submit Attendance Log',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  : Text(
+                      loc.get(_isEditing ? 'save_attendance_changes' : 'submit_attendance_log'),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
             ),
           ),

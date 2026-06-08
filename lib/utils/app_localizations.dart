@@ -278,6 +278,16 @@ class AppLocalizations {
       'ar': 'تسجيل الحضور والغياب',
       'en': 'Take Attendance',
     },
+    'save_attendance_changes': {
+      'ku': 'پاشکەوتکردنی گۆڕانکارییەکان',
+      'ar': 'حفظ التغييرات',
+      'en': 'Save Changes',
+    },
+    'submit_attendance_log': {
+      'ku': 'ناردنی ئامادەبوون',
+      'ar': 'إرسال الحضور والغياب',
+      'en': 'Submit Attendance Log',
+    },
     'submit_homeworks': {
       'ku': 'ناردنی ئەرکەکان',
       'ar': 'إرسال الواجبات البيئية',
