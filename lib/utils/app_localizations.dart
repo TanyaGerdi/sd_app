@@ -544,6 +544,11 @@ class AppLocalizations {
       'ar': 'الأساتذة',
       'en': 'Teachers',
     },
+    'duration_years_label': {
+      'ku': 'ساڵ',
+      'ar': 'سنوات',
+      'en': 'Years',
+    },
     'about_title': {
       'ku': 'دەربارەی ئێمە',
       'ar': 'عن المعهد',

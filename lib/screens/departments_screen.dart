@@ -132,6 +132,7 @@ class _DepartmentsScreenState extends State<DepartmentsScreen> {
           'video_url': d['video_url'] ?? '',
           'gallery_images': d['gallery_images'] ?? [],
           'image': imgUrl.isNotEmpty ? imgUrl : '',
+          'duration_years': d['duration_years'] ?? 2,
         };
       }).toList();
     });
@@ -476,6 +477,10 @@ class _InteractiveDepartmentCardState
                       _badge(
                         Icons.person_rounded,
                         '${widget.dept['teachers']} ${localizations.get(widget.dept['teachers'] == '1' ? 'teacher' : 'teachers_count')}',
+                      ),
+                      _badge(
+                        Icons.access_time_rounded,
+                        '${widget.dept['duration_years']} ${localizations.get('duration_years_label') ?? 'ساڵ'}',
                       ),
                     ],
                   ),

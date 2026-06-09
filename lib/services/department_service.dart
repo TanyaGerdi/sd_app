@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sd_institute/services/api_service.dart';
 import 'package:sd_institute/services/cache_service.dart';
 
@@ -19,13 +20,33 @@ class DepartmentService {
             gallery = List<String>.from(d['gallery_images']);
           }
         }
+
+        String subtitle = '';
+        String studentsCount = '0';
+        String staffCount = '0';
+        final descEn = d['description_en']?.toString() ?? '';
+        if (descEn.isNotEmpty) {
+          try {
+            final Map<String, dynamic> extra = jsonDecode(descEn);
+            subtitle = extra['subtitle']?.toString() ?? '';
+            studentsCount = extra['studentsCount']?.toString() ?? '0';
+            staffCount = extra['staffCount']?.toString() ?? '0';
+          } catch (_) {
+            subtitle = descEn;
+          }
+        }
+
         return {
           'id': d['id'],
           'name': d['name_ku'] ?? 'بەشێکی نوێ',
+          'subtitle': subtitle.isNotEmpty ? subtitle : 'تایبەتمەندی بەش',
           'description': d['description_ku'] ?? 'هیچ زانیارییەک نەدۆزرایەوە',
           'image_url': d['image_url'] ?? '',
           'video_url': d['video_url'] ?? '',
           'gallery_images': gallery,
+          'duration_years': d['duration_years'] ?? 2,
+          'students_count': studentsCount,
+          'teachers_count': staffCount,
         };
       }).toList();
 
