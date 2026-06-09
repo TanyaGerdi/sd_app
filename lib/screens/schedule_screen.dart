@@ -29,6 +29,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   List<Map<String, dynamic>> _schedules = [];
   List<Map<String, dynamic>> _teacherLectures = [];
   bool _isLoading = true;
+  int _selectedTab = 0;
   late AnimationController _pulseController;
   late AnimationController _rotateController;
 
@@ -75,6 +76,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
             _teacherLectures = data.map((e) => Map<String, dynamic>.from(e)).toList();
           }
         }
+        final generalData = await ScheduleService.getSchedules();
+        _schedules = generalData;
       } else {
         final data = await ScheduleService.getSchedules();
         _schedules = data;
@@ -156,17 +159,39 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 children: [
                   _Header(isDark: isDark),
                   const SizedBox(height: 8),
+                  if (AuthService.isTeacher() && !_isLoading) ...[
+                    _ScheduleTabSelector(
+                      selectedTab: _selectedTab,
+                      onTabChanged: (index) {
+                        setState(() {
+                          _selectedTab = index;
+                        });
+                      },
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   Expanded(
                     child: _isLoading
                         ? _LoadingShimmer(isDark: isDark)
                         : AuthService.isTeacher()
-                            ? _teacherLectures.isEmpty
-                                ? _EmptyState(isDark: isDark)
-                                : _TeacherScheduleList(
-                                    lectures: _teacherLectures,
-                                    isDark: isDark,
-                                    gradientForIndex: _gradientForIndex,
-                                  )
+                            ? _selectedTab == 0
+                                ? _teacherLectures.isEmpty
+                                    ? _EmptyState(isDark: isDark)
+                                    : _TeacherScheduleList(
+                                        lectures: _teacherLectures,
+                                        isDark: isDark,
+                                        gradientForIndex: _gradientForIndex,
+                                      )
+                                : _schedules.isEmpty
+                                    ? _EmptyState(isDark: isDark)
+                                    : _ScheduleList(
+                                        schedules: _schedules,
+                                        isDark: isDark,
+                                        gradientForIndex: _gradientForIndex,
+                                        onOpen: (url, title, idx) =>
+                                            _openInApp(context, url, title, idx),
+                                      )
                             : _schedules.isEmpty
                                 ? _EmptyState(isDark: isDark)
                                 : _ScheduleList(
@@ -1340,6 +1365,108 @@ class _TeacherLectureCard extends StatelessWidget {
                     ],
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScheduleTabSelector extends StatelessWidget {
+  final int selectedTab;
+  final ValueChanged<int> onTabChanged;
+  final bool isDark;
+
+  const _ScheduleTabSelector({
+    required this.selectedTab,
+    required this.onTabChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: ClayContainer(
+        borderRadius: 16,
+        depth: 6,
+        color: isDark ? const Color(0xFF16161B) : const Color(0xFFE8EAF0),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildTabButton(
+                  index: 0,
+                  label: 'خشتەی من',
+                  englishLabel: 'My Schedule',
+                ),
+              ),
+              Expanded(
+                child: _buildTabButton(
+                  index: 1,
+                  label: 'خشتەی گشتی',
+                  englishLabel: 'General Schedule',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton({
+    required int index,
+    required String label,
+    required String englishLabel,
+  }) {
+    final isSelected = selectedTab == index;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTabChanged(index);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFF6C5CE7), Color(0xFFAF52DE)],
+                )
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF6C5CE7).withValues(alpha: 0.45),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+              ),
+            ),
+            const SizedBox(height: 1),
+            Text(
+              englishLabel,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white70 : (isDark ? Colors.white38 : Colors.black38),
               ),
             ),
           ],
