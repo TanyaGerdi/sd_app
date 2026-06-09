@@ -20,6 +20,7 @@ import 'package:sd_institute/theme/theme_provider.dart';
 import 'package:sd_institute/widgets/bottom_nav_bar.dart';
 import 'package:sd_institute/services/institute_service.dart';
 import 'package:sd_institute/services/auth_service.dart';
+import 'package:sd_institute/services/lecture_reminder_service.dart';
 import 'package:sd_institute/utils/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -837,6 +838,7 @@ class DrawerWrapperState extends State<DrawerWrapper>
             onPressed: () async {
               Navigator.pop(context);
               await AuthService.logout();
+              LectureReminderService.stop();
               setState(() {});
             },
             child: Text(loc.get('yes'), style: const TextStyle(color: Color(0xFFFF3B30))),

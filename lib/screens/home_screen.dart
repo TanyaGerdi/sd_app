@@ -26,6 +26,7 @@ import 'package:sd_institute/screens/student_homework_screen.dart';
 import 'package:sd_institute/services/institute_service.dart';
 import 'package:sd_institute/services/post_service.dart';
 import 'package:sd_institute/services/notification_service.dart';
+import 'package:sd_institute/services/lecture_reminder_service.dart';
 import 'package:sd_institute/utils/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -619,6 +620,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               Navigator.pop(dialogContext);
               await AuthService.logout();
+              LectureReminderService.stop();
             },
             child: Text(loc.get('yes'), style: const TextStyle(color: Color(0xFFFF3B30))),
           ),

@@ -34,8 +34,7 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _localPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String _androidNotificationIcon =
-      '@mipmap/ic_launcher';
+  static const String _androidNotificationIcon = '@mipmap/ic_launcher';
 
   // High importance channel for heads-up display on Android
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -102,7 +101,9 @@ class NotificationService {
 
   /// Beautiful in-app notification banner that slides down from the top
   static void _showInAppToast(String title, String body, String? payload) {
-    debugPrint('Show In App Toast: navigatorKey.currentState = ${navigatorKey.currentState}');
+    debugPrint(
+      'Show In App Toast: navigatorKey.currentState = ${navigatorKey.currentState}',
+    );
     final overlay = navigatorKey.currentState?.overlay;
     debugPrint('Show In App Toast: overlay = $overlay');
     if (overlay == null) return;
@@ -201,10 +202,10 @@ class NotificationService {
     try {
       final isTeacher = AuthService.isTeacher();
       final userId = AuthService.getStudentId();
-      final response = await ApiService.getRaw('/device_tokens', queryParams: {
-        'token': token,
-        'single': '1',
-      });
+      final response = await ApiService.getRaw(
+        '/device_tokens',
+        queryParams: {'token': token, 'single': '1'},
+      );
       final existing = response['data'];
 
       final Map<String, dynamic> tokenData = {
@@ -245,22 +246,25 @@ class NotificationService {
       final filtered = data.where((item) {
         final audience = item['target_audience']?.toString();
         if (audience == null || audience == 'all') return true;
-        
+
         // If logged-in user is a teacher, only show general or teacher-specific ones
         if (isTeacher) {
           if (studentEmail != null && audience == studentEmail) return true;
-          if (studentId != null && audience == 'teacher_$studentId') return true;
+          if (studentId != null && audience == 'teacher_$studentId')
+            return true;
           if (audience == 'teachers') return true;
           return false; // ignore student/dept notifications
         }
 
         // If logged-in user is a student
-        if (studentId != null && (audience == studentId || audience == 'student_$studentId')) return true;
+        if (studentId != null &&
+            (audience == studentId || audience == 'student_$studentId'))
+          return true;
         if (studentEmail != null && audience == studentEmail) return true;
-        
+
         final deptId = AuthService.currentStudent?['department_id']?.toString();
         if (deptId != null && audience == 'dept_$deptId') return true;
-        
+
         return false;
       }).toList();
 

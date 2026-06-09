@@ -15,6 +15,7 @@ import 'package:sd_institute/theme/theme_provider.dart';
 import 'package:sd_institute/services/notification_service.dart';
 import 'package:sd_institute/services/cache_service.dart';
 import 'package:sd_institute/services/auth_service.dart';
+import 'package:sd_institute/services/lecture_reminder_service.dart';
 import 'package:sd_institute/utils/app_localizations.dart';
 
 // Handle background FCM messages (runs in its own isolate)
@@ -136,6 +137,11 @@ void main() async {
 
   // Initialize Firebase and Messaging in the background without blocking the UI
   _initFirebaseAndMessaging();
+
+  // Start lecture reminder polling if the user is a logged-in teacher
+  if (AuthService.isTeacher()) {
+    LectureReminderService.start();
+  }
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

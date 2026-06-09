@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:sd_institute/services/auth_service.dart';
 import 'package:sd_institute/services/api_service.dart';
 import 'package:sd_institute/services/notification_service.dart';
+import 'package:sd_institute/services/lecture_reminder_service.dart';
 import 'package:sd_institute/theme/app_colors.dart';
 import 'package:sd_institute/utils/app_localizations.dart';
 
@@ -77,6 +78,11 @@ class _LoginScreenState extends State<LoginScreen>
         }
       } catch (fcmError) {
         debugPrint('FCM Token registration on login failed: $fcmError');
+      }
+
+      // Start lecture reminder for teachers
+      if (_isTeacher) {
+        LectureReminderService.start();
       }
 
       if (!mounted) return;
