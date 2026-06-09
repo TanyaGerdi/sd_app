@@ -7,6 +7,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:sd_institute/theme/app_colors.dart';
 import 'package:sd_institute/services/schedule_service.dart';
+import 'package:sd_institute/services/auth_service.dart';
+import 'package:sd_institute/services/api_service.dart';
 import 'package:sd_institute/widgets/cached_image.dart';
 import 'package:sd_institute/widgets/clay_container.dart';
 
@@ -25,6 +27,7 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen>
     with TickerProviderStateMixin {
   List<Map<String, dynamic>> _schedules = [];
+  List<Map<String, dynamic>> _teacherLectures = [];
   bool _isLoading = true;
   late AnimationController _pulseController;
   late AnimationController _rotateController;
@@ -59,10 +62,28 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 
   Future<void> _loadSchedules() async {
-    final data = await ScheduleService.getSchedules();
+    setState(() => _isLoading = true);
+    try {
+      if (AuthService.isTeacher()) {
+        final teacherId = AuthService.getStudentId();
+        if (teacherId != null) {
+          final data = await ApiService.get(
+            '/teacher_lectures',
+            queryParams: {'teacher_id': teacherId.toString()},
+          );
+          if (data is List) {
+            _teacherLectures = data.map((e) => Map<String, dynamic>.from(e)).toList();
+          }
+        }
+      } else {
+        final data = await ScheduleService.getSchedules();
+        _schedules = data;
+      }
+    } catch (e) {
+      debugPrint('Error loading schedules: $e');
+    }
     if (!mounted) return;
     setState(() {
-      _schedules = data;
       _isLoading = false;
     });
   }
@@ -138,15 +159,23 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                   Expanded(
                     child: _isLoading
                         ? _LoadingShimmer(isDark: isDark)
-                        : _schedules.isEmpty
-                        ? _EmptyState(isDark: isDark)
-                        : _ScheduleList(
-                            schedules: _schedules,
-                            isDark: isDark,
-                            gradientForIndex: _gradientForIndex,
-                            onOpen: (url, title, idx) =>
-                                _openInApp(context, url, title, idx),
-                          ),
+                        : AuthService.isTeacher()
+                            ? _teacherLectures.isEmpty
+                                ? _EmptyState(isDark: isDark)
+                                : _TeacherScheduleList(
+                                    lectures: _teacherLectures,
+                                    isDark: isDark,
+                                    gradientForIndex: _gradientForIndex,
+                                  )
+                            : _schedules.isEmpty
+                                ? _EmptyState(isDark: isDark)
+                                : _ScheduleList(
+                                    schedules: _schedules,
+                                    isDark: isDark,
+                                    gradientForIndex: _gradientForIndex,
+                                    onOpen: (url, title, idx) =>
+                                        _openInApp(context, url, title, idx),
+                                  ),
                   ),
                 ],
               ),
@@ -1119,3 +1148,204 @@ class _ErrorView extends StatelessWidget {
     );
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Teacher Schedule List View
+// ──────────────────────────────────────────────────────────────────────────
+class _TeacherScheduleList extends StatelessWidget {
+  final List<Map<String, dynamic>> lectures;
+  final bool isDark;
+  final List<Color> Function(int) gradientForIndex;
+
+  const _TeacherScheduleList({
+    required this.lectures,
+    required this.isDark,
+    required this.gradientForIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final daysOfWeek = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    final dayLabels = {
+      'Sunday': 'یەکشەممە (Sunday)',
+      'Monday': 'دووشەممە (Monday)',
+      'Tuesday': 'سێشەممە (Tuesday)',
+      'Wednesday': 'چوارشەممە (Wednesday)',
+      'Thursday': 'پێنجشەممە (Thursday)',
+      'Friday': 'هەینی (Friday)',
+      'Saturday': 'شەممە (Saturday)',
+    };
+
+    final activeDays = daysOfWeek.where((day) => lectures.any((l) => l['day_of_week'] == day)).toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 110),
+      physics: const BouncingScrollPhysics(),
+      itemCount: activeDays.length,
+      itemBuilder: (context, dayIdx) {
+        final day = activeDays[dayIdx];
+        final label = dayLabels[day] ?? day;
+        final dayLectures = lectures.where((l) => l['day_of_week'] == day).toList()
+          ..sort((a, b) => (a['start_time'] ?? '').toString().compareTo((b['start_time'] ?? '').toString()));
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, top: 16, right: 4),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF6C5CE7),
+                ),
+              ),
+            ),
+            ...dayLectures.map((lecture) {
+              final idx = lectures.indexOf(lecture);
+              return _TeacherLectureCard(
+                lecture: lecture,
+                isDark: isDark,
+                gradColors: gradientForIndex(idx),
+              );
+            }),
+            const SizedBox(height: 12),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Teacher Lecture Item Card
+// ──────────────────────────────────────────────────────────────────────────
+class _TeacherLectureCard extends StatelessWidget {
+  final Map<String, dynamic> lecture;
+  final bool isDark;
+  final List<Color> gradColors;
+
+  const _TeacherLectureCard({
+    required this.lecture,
+    required this.isDark,
+    required this.gradColors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c1 = gradColors[0];
+    final c2 = gradColors[1];
+    
+    final subject = (lecture['subject'] ?? '').toString();
+    final classroom = (lecture['classroom'] ?? '').toString();
+    
+    String timeStr = '';
+    final start = lecture['start_time']?.toString() ?? '';
+    final end = lecture['end_time']?.toString() ?? '';
+    if (start.isNotEmpty && end.isNotEmpty) {
+      final sParts = start.split(':');
+      final eParts = end.split(':');
+      final sFormatted = sParts.length >= 2 ? '${sParts[0]}:${sParts[1]}' : start;
+      final eFormatted = eParts.length >= 2 ? '${eParts[0]}:${eParts[1]}' : end;
+      timeStr = '$sFormatted - $eFormatted';
+    }
+
+    return ClayContainer(
+      margin: const EdgeInsets.only(bottom: 16),
+      borderRadius: 20,
+      depth: 10,
+      color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFE8EAF0),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              c1.withValues(alpha: 0.08),
+              c2.withValues(alpha: 0.02),
+            ],
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [c1, c2],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: c1.withValues(alpha: 0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.menu_book_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    subject,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF0F0F23),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_rounded, size: 14, color: isDark ? Colors.white60 : Colors.black45),
+                      const SizedBox(width: 4),
+                      Text(
+                        classroom,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(Icons.access_time_rounded, size: 14, color: isDark ? Colors.white60 : Colors.black45),
+                      const SizedBox(width: 4),
+                      Text(
+                        timeStr,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
