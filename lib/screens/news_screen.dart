@@ -142,6 +142,20 @@ class _NewsScreenState extends State<NewsScreen> {
     );
   }
 
+  String _getLocalizedTitle(BuildContext context, String rawTitle) {
+    final loc = AppLocalizations.of(context);
+    if (rawTitle == 'نوێترین هەواڵەکان' || rawTitle == 'news') {
+      return loc.get('latest_news');
+    }
+    if (rawTitle == 'بابەتی قوتابیان') {
+      return loc.get('student_articles');
+    }
+    if (rawTitle == 'وتەی قوتابیان') {
+      return loc.get('student_quotes');
+    }
+    return rawTitle;
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -176,7 +190,7 @@ class _NewsScreenState extends State<NewsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.title,
+                                _getLocalizedTitle(context, widget.title),
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,

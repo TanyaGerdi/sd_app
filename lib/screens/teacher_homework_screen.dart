@@ -141,7 +141,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _loadHomeworks,
-                            child: const Text('Try Again'),
+                            child: Text(loc.get('retry')),
                           ),
                         ],
                       ),
@@ -155,14 +155,14 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                             Icon(Icons.assignment_turned_in_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black38),
                             const SizedBox(height: 12),
                             Text(
-                              'No homework submissions yet.',
+                              loc.get('no_homework_submissions_yet'),
                               style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 14),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
                               onPressed: _showAddHomeworkSheet,
                               icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Add First Assignment'),
+                              label: Text(loc.get('add_first_assignment')),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -278,7 +278,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            isOverdue ? 'Overdue' : 'Active',
+                            isOverdue ? loc.get('overdue') : loc.get('active'),
                             style: TextStyle(
                               color: isOverdue ? Colors.red : const Color(0xFF34C759),
                               fontWeight: FontWeight.bold,
@@ -331,7 +331,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                           Icon(Icons.insert_drive_file_rounded, color: AppColors.primary, size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            'View Attachment',
+                            loc.get('view_attachment'),
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
@@ -353,7 +353,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Due Date: ',
+                      loc.get('due'),
                       style: TextStyle(
                         color: isDark ? Colors.white30 : Colors.black38,
                         fontSize: 12,
@@ -474,7 +474,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
           '/storage/homeworks',
           filePath: _selectedFile!.path!,
           fieldName: 'file',
-          extraFields: {'path': filename},
+          extraFields: {
+            'path': filename,
+            'bucket': 'homeworks',
+          },
         );
         uploadedFilePath = uploadResult['publicUrl'] ?? uploadResult['path'];
       }
@@ -499,10 +502,8 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
           await ApiService.post(
             '/notifications',
             data: {
-              'title_ku': 'ئەرکی نوێ: ${_titleCtrl.text.trim()}',
-              'title_en': 'New Homework: ${_titleCtrl.text.trim()}',
-              'description_ku': 'ئەرکێکی نوێ بارکراوە بۆ بەشەکەت. کاتی کۆتایی: $dateStr.',
-              'description_en': 'A new homework assignment has been posted. Due: $dateStr.',
+              'title': 'ئەرکی نوێ: ${_titleCtrl.text.trim()}',
+              'message': 'ئەرکێکی نوێ بارکراوە بۆ بەشەکەت. کاتی کۆتایی: $dateStr.',
               'target_audience': 'dept_$deptId',
             },
           );
@@ -528,10 +529,8 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
           await ApiService.post(
             '/notifications',
             data: {
-              'title_ku': 'ئەرکی نوێ نوێکراوەتەوە: ${_titleCtrl.text.trim()}',
-              'title_en': 'Homework Updated: ${_titleCtrl.text.trim()}',
-              'description_ku': 'ئەرکێکی پێشوو نوێکراوەتەوە بۆ بەشەکەت. کاتی کۆتایی نوێ: $dateStr.',
-              'description_en': 'A homework assignment has been updated. New Due: $dateStr.',
+              'title': 'ئەرکی نوێ نوێکراوەتەوە: ${_titleCtrl.text.trim()}',
+              'message': 'ئەرکێکی پێشوو نوێکراوەتەوە بۆ بەشەکەت. کاتی کۆتایی نوێ: $dateStr.',
               'target_audience': 'dept_$deptId',
             },
           );
@@ -560,6 +559,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final loc = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -587,7 +587,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.homework == null ? 'Post New Homework' : 'Edit Homework',
+                    widget.homework == null ? loc.get('post_new_homework') : loc.get('edit_homework'),
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   IconButton(
@@ -600,23 +600,23 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
               
               _buildField(
                 controller: _titleCtrl,
-                label: 'Title',
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                label: loc.get('title'),
+                validator: (v) => v == null || v.isEmpty ? loc.get('required') : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 12),
               
               _buildField(
                 controller: _descCtrl,
-                label: 'Description',
+                label: loc.get('description'),
                 maxLines: 3,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                validator: (v) => v == null || v.isEmpty ? loc.get('required') : null,
                 isDark: isDark,
               ),
               const SizedBox(height: 16),
 
               Text(
-                'Attachment File (Optional)',
+                loc.get('attachment_file_optional'),
                 style: TextStyle(
                   color: isDark ? Colors.white60 : Colors.black54,
                   fontSize: 12,
@@ -628,7 +628,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   ? OutlinedButton.icon(
                       onPressed: _pickFile,
                       icon: const Icon(Icons.attach_file_rounded),
-                      label: const Text('Attach File'),
+                      label: Text(loc.get('attach_file')),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: BorderSide(color: AppColors.primary),
@@ -651,7 +651,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                             child: Text(
                               _selectedFile != null
                                   ? _selectedFile!.name
-                                  : 'Existing Attachment',
+                                  : loc.get('existing_attachment'),
                               style: TextStyle(
                                 color: isDark ? Colors.white : Colors.black,
                                 fontSize: 13,
@@ -682,7 +682,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Due Date',
+                        loc.get('due').trim().replaceAll(':', ''),
                         style: TextStyle(
                           color: isDark ? Colors.white60 : Colors.black54,
                           fontSize: 12,
@@ -700,7 +700,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     onPressed: () => _selectDueDate(context),
                     icon: Icon(Icons.edit_calendar_rounded, color: AppColors.primary),
                     label: Text(
-                      'Choose Date',
+                      loc.get('choose_date'),
                       style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -724,7 +724,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
-                          widget.homework == null ? 'Submit Assignment' : 'Save Changes',
+                          widget.homework == null ? loc.get('submit_assignment') : loc.get('save_changes'),
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                 ),

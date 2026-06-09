@@ -29,7 +29,10 @@ class ApiService {
   }) async {
     try {
       final response = await _dio.get(path, queryParameters: queryParams);
-      return response.data['data'];
+      if (response.data is Map && response.data.containsKey('data')) {
+        return response.data['data'];
+      }
+      return response.data;
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -101,7 +104,10 @@ class ApiService {
         ...?extraFields,
       });
       final response = await _dio.post(path, data: formData);
-      return response.data['data'];
+      if (response.data is Map && response.data.containsKey('data')) {
+        return response.data['data'];
+      }
+      return response.data;
     } on DioException catch (e) {
       _handleError(e);
       rethrow;

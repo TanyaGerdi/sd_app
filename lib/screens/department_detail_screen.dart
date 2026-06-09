@@ -10,6 +10,7 @@ import 'package:sd_institute/services/staff_service.dart';
 import 'package:sd_institute/widgets/cached_image.dart';
 import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class DepartmentDetailScreen extends StatefulWidget {
   final Map<String, dynamic> department;
@@ -130,9 +131,10 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     // Parallax factor from scroll
     final parallax = (_scrollOffset * 0.4).clamp(0.0, heroH * 0.3);
     final heroOpacity = (1.0 - (_scrollOffset / (heroH * 0.7))).clamp(0.0, 1.0);
+    final localeProvider = LocaleProviderInherited.of(context);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Scaffold(
@@ -487,7 +489,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    dept['name'] ?? 'بەش',
+                    dept['name'] ?? AppLocalizations.of(context).get('department_fallback'),
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w900,
@@ -507,7 +509,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      dept['subtitle'] ?? 'تایبەتمەندی',
+                      dept['subtitle'] ?? AppLocalizations.of(context).get('specialty'),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -592,9 +594,9 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Text(
-                      'ڤیدیۆی بەش',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).get('department_video'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 19,
                         fontWeight: FontWeight.w800,
@@ -634,10 +636,11 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     Color accent,
     bool isDark,
   ) {
+    final loc = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionHeader('دەربارەی بەش', accent, isDark, 250),
+        _sectionHeader(loc.get('about_department'), accent, isDark, 250),
         const SizedBox(height: 16),
         // Magazine-style description card
         ClayContainer(
@@ -656,8 +659,13 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                dept['description'] ??
-                    'پەیمانگەی تەکنیکی تایبەتی ڕواندز، خوێندنی ئەکادیمیی دوو ساڵە لە بەشی ${dept['name'] ?? ''} پێشکەش بە کۆمەڵگە دەکات.',
+                dept['description'] ?? (
+                  loc.locale == 'en'
+                    ? 'Rwandz Private Technical Institute offers two years of academic education in the ${dept['name'] ?? ''} department.'
+                    : loc.locale == 'ar'
+                      ? 'يقدم معهد رواندز التقني الخاص سنتين من التعليم الأكاديمي في قسم ${dept['name'] ?? ""}.'
+                      : 'پەیمانگەی تەکنیکی تایبەتی ڕواندز، خوێندنی ئەکادیمیی دوو ساڵە لە بەشی ${dept['name'] ?? ""} پێشکەش بە کۆمەڵگە دەکات.'
+                ),
                 style: TextStyle(
                   fontSize: 15,
                   height: 2.0,
@@ -723,13 +731,14 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
   //  PREMIUM GALLERY
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   Widget _buildPremiumGallery(List<String> images, Color accent, bool isDark) {
+    final loc = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _sectionHeader('وێنەکانی بەش', accent, isDark, 400),
+            _sectionHeader(loc.get('department_gallery'), accent, isDark, 400),
             // Image count badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -738,7 +747,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
-                '\${images.length} وێنە',
+                '${images.length} ${loc.get('photos')}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -802,6 +811,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
     Color accent,
     bool isDark,
   ) {
+    final loc = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -817,7 +827,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _sectionHeader('ستافی بەش', accent, isDark, 500),
+              _sectionHeader(loc.get('dept_staff_title'), accent, isDark, 500),
               // See all button
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -833,7 +843,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'هەموو',
+                      loc.get('all'),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -891,6 +901,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
   }
 
   Widget _buildEmptyStaffState(Color accent, bool isDark) {
+    final loc = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -910,7 +921,7 @@ class _DepartmentDetailScreenState extends State<DepartmentDetailScreen>
           ),
           const SizedBox(height: 12),
           Text(
-            'هیچ ستافێک نەدۆزرایەوە',
+            loc.get('no_staff_found'),
             style: TextStyle(
               color: isDark ? Colors.white38 : Colors.black38,
               fontSize: 14,
@@ -1214,7 +1225,9 @@ class _PremiumStaffCardState extends State<_PremiumStaffCard> {
                   const SizedBox(height: 3),
                   // Role
                   Text(
-                    widget.person['role'] ?? '',
+                    (widget.person['role'] == null || widget.person['role']!.isEmpty || widget.person['role'] == 'پۆست')
+                        ? AppLocalizations.of(context).get('role_fallback')
+                        : widget.person['role']!,
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

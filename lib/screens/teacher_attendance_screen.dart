@@ -156,10 +156,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           await ApiService.post(
             '/notifications',
             data: {
-              'title_ku': 'تۆمارکردنی ئامادەبوون',
-              'title_en': 'Attendance Recorded',
-              'description_ku': 'ئامادەبوونی ڕێکەوتی $dateStr تۆمارکرا بۆ بەشەکەت.',
-              'description_en': 'Attendance for $dateStr has been recorded for your department.',
+              'title': 'تۆمارکردنی ئامادەبوون',
+              'message': 'ئامادەبوونی ڕێکەوتی $dateStr تۆمارکرا بۆ بەشەکەت.',
               'target_audience': 'dept_$deptId',
             },
           );
@@ -247,7 +245,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: _loadStudents,
-                          child: const Text('Try Again'),
+                          child: Text(loc.get('retry')),
                         ),
                       ],
                     ),
@@ -268,7 +266,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                                   Icon(Icons.group_off_rounded, size: 64, color: isDark ? Colors.white30 : Colors.black38),
                                   const SizedBox(height: 12),
                                   Text(
-                                    'No students found in your department.',
+                                    loc.get('no_students_found'),
                                     style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 14),
                                   ),
                                 ],
@@ -351,9 +349,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               ElevatedButton.icon(
                 onPressed: () => _selectDate(context),
                 icon: const Icon(Icons.edit_calendar_rounded, size: 16, color: Colors.white),
-                label: const Text(
-                  'Change Date',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
+                label: Text(
+                  loc.get('change_date'),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -423,7 +421,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                           ),
                         ),
                         Text(
-                          'Rate',
+                          loc.get('rate'),
                           style: TextStyle(
                             color: isDark ? Colors.white54 : Colors.black54,
                             fontWeight: FontWeight.w700,
@@ -441,13 +439,13 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    _buildStatLine('Total Students', total.toString(), isDark, const Color(0xFF5B8DEF)),
+                    _buildStatLine(loc.get('total_students'), total.toString(), isDark, const Color(0xFF5B8DEF)),
                     const SizedBox(height: 8),
-                    _buildStatLine('Present', present.toString(), isDark, const Color(0xFF34C759)),
+                    _buildStatLine(loc.get('present'), present.toString(), isDark, const Color(0xFF34C759)),
                     const SizedBox(height: 8),
-                    _buildStatLine('Late', late.toString(), isDark, Colors.orange),
+                    _buildStatLine(loc.get('late'), late.toString(), isDark, Colors.orange),
                     const SizedBox(height: 8),
-                    _buildStatLine('Absent', absent.toString(), isDark, Colors.redAccent),
+                    _buildStatLine(loc.get('absent'), absent.toString(), isDark, Colors.redAccent),
                   ],
                 ),
               ),

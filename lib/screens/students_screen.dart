@@ -6,6 +6,7 @@ import 'package:sd_institute/theme/app_colors.dart';
 import 'package:sd_institute/screens/news_screen.dart';
 import 'package:sd_institute/screens/schedule_screen.dart';
 import 'package:sd_institute/widgets/clay_container.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class StudentsScreen extends StatelessWidget {
   const StudentsScreen({super.key});
@@ -14,25 +15,27 @@ class StudentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
     final size = MediaQuery.of(context).size;
+    final loc = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
 
     final items = [
       {
-        'title': 'بابەتی قوتابیان',
-        'subtitle': 'سەرجەم وانە و پەرتووکەکانی بەشەکان بخوێنەوە',
+        'title': loc.get('student_articles'),
+        'subtitle': loc.get('student_articles_sub'),
         'icon': Icons.menu_book_rounded,
         'color': const Color(0xFF10B981), // Emerald
         'category': 'student_news',
       },
       {
-        'title': 'وتەی قوتابیان',
-        'subtitle': 'ئەزموون و بیروڕای قوتابییە سەرکەوتووەکانمان',
+        'title': loc.get('student_quotes'),
+        'subtitle': loc.get('student_quotes_sub'),
         'icon': Icons.record_voice_over_rounded,
         'color': const Color(0xFF8B5CF6), // Violet
         'category': 'quotes',
       },
       {
-        'title': 'خشتەی وانەکان',
-        'subtitle': 'کاتی وانە و تاقیکردنەوەکان بە وردی',
+        'title': loc.get('class_schedule'),
+        'subtitle': loc.get('class_schedule_sub'),
         'icon': Icons.schedule_rounded,
         'color': const Color(0xFF3B82F6), // Blue
         'onTap': () => Navigator.push(
@@ -43,7 +46,7 @@ class StudentsScreen extends StatelessWidget {
     ];
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
             ? const Color(0xFF000000)
@@ -112,7 +115,7 @@ class StudentsScreen extends StatelessWidget {
 
                         // Title
                         Text(
-                              'پەڕەی\nقوتابیان',
+                              loc.get('students_page_title'),
                               style: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.w900,

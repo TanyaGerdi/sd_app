@@ -102,6 +102,8 @@ class AppLocalizations {
 
   String get(String key) => _strings[key]?[_lang.name] ?? key;
 
+  String get locale => _lang.name;
+
   // ─── Translation Map ────────────────────────────────────────────────────
   static const Map<String, Map<String, String>> _strings = {
     // ── Institute Name ─────────────────────────────────────────
@@ -111,8 +113,8 @@ class AppLocalizations {
       'en': 'SD Technical Institute',
     },
     'institute_tagline': {
-      'ku': 'SD Technical and Vocational Institute',
-      'ar': 'SD Technical and Vocational Institute',
+      'ku': 'پەیمانگەی تەکنیکی و پیشەیی SD',
+      'ar': 'معهد SD التقني والمهني',
       'en': 'SD Technical and Vocational Institute',
     },
     'institute_slogan': {
@@ -290,7 +292,7 @@ class AppLocalizations {
     },
     'submit_homeworks': {
       'ku': 'ناردنی ئەرکەکان',
-      'ar': 'إرسال الواجبات البيئية',
+      'ar': 'إرسال الواجبات الدراسية',
       'en': 'Submit Homeworks',
     },
 
@@ -716,6 +718,293 @@ class AppLocalizations {
       'ku': 'هیچ ستافێک نەدۆزرایەوە لەم بەشەدا',
       'ar': 'لم يتم العثور على أي موظف في هذا القسم',
       'en': 'No staff members found in this department',
+    },
+
+    // ── Homeworks / Submissions ───────────────────────────────
+    'pending': {
+      'ku': 'نوێیەکان',
+      'ar': 'قيد الانتظار',
+      'en': 'Pending',
+    },
+    'submitted': {
+      'ku': 'نێردراوەکان',
+      'ar': 'المرسلة',
+      'en': 'Submitted',
+    },
+    'no_submitted_homeworks': {
+      'ku': 'هیچ ئەرکێکی نێردراو نییە',
+      'ar': 'لا توجد واجبات مرسلة بعد.',
+      'en': 'No submitted homeworks yet.',
+    },
+    'no_pending_homeworks': {
+      'ku': 'هیچ ئەرکێکی نوێ نییە',
+      'ar': 'لا توجد واجبات معلقة.',
+      'en': 'No pending homeworks.',
+    },
+    'active': {
+      'ku': 'چالاکە',
+      'ar': 'نشط',
+      'en': 'Active',
+    },
+    'overdue': {
+      'ku': 'کاتی بەسەرچووە',
+      'ar': 'متأخر / فات الأوان',
+      'en': 'Overdue',
+    },
+    'deadline_near': {
+      'ku': 'کاتی کۆتایی نزیکە!',
+      'ar': 'اقترب الموعد النهائي!',
+      'en': 'Deadline Near!',
+    },
+    'view_attachment': {
+      'ku': 'بینینی فایلی هاوپێچ',
+      'ar': 'عرض المرفق',
+      'en': 'View Attachment',
+    },
+    'due': {
+      'ku': 'کاتی کۆتایی: ',
+      'ar': 'تاريخ التسليم: ',
+      'en': 'Due: ',
+    },
+    'view_submission': {
+      'ku': 'بینینی وەڵامەکەت',
+      'ar': 'عرض التسليم',
+      'en': 'View Submission',
+    },
+    'submit_answer': {
+      'ku': 'ناردنی وەڵام',
+      'ar': 'تسليم الإجابة',
+      'en': 'Submit Answer',
+    },
+    'submit_your_homework': {
+      'ku': 'ناردنی ئەرکەکەت',
+      'ar': 'تسليم واجبك المنزلي',
+      'en': 'Submit Your Homework',
+    },
+    'select_answer_file': {
+      'ku': 'فایلی وەڵامەکە دیاریبکە (PDF, DOCX, وێنە، هتد.)',
+      'ar': 'اختر ملف الإجابة (PDF، DOCX، صور، إلخ)',
+      'en': 'Select Answer File (PDF, DOCX, Images, etc.)',
+    },
+    'choose_file': {
+      'ku': 'دیاریکردنی فایل',
+      'ar': 'اختر ملفاً',
+      'en': 'Choose File',
+    },
+    'upload_and_submit': {
+      'ku': 'بارکردن و ناردن',
+      'ar': 'رفع وتسليم',
+      'en': 'Upload & Submit',
+    },
+    'answer_submitted_success': {
+      'ku': 'وەڵامەکەت سەرکەوتووانە نێردرا!',
+      'ar': 'تم تسليم الإجابة بنجاح!',
+      'en': 'Answer submitted successfully!',
+    },
+    'please_select_file': {
+      'ku': 'تکایە فایلێک دیاریبکە بۆ ناردن.',
+      'ar': 'يرجى اختيار ملف للتسليم.',
+      'en': 'Please select a file to submit.',
+    },
+    'post_new_homework': {
+      'ku': 'دانانی ئەرکی نوێ',
+      'ar': 'نشر واجب جديد',
+      'en': 'Post New Homework',
+    },
+    'edit_homework': {
+      'ku': 'دەستکاریکردنی ئەرک',
+      'ar': 'تعديل الواجب',
+      'en': 'Edit Homework',
+    },
+    'title': {
+      'ku': 'ناونیشان',
+      'ar': 'العنوان',
+      'en': 'Title',
+    },
+    'description': {
+      'ku': 'دەربارە / ڕوونکردنەوە',
+      'ar': 'الوصف',
+      'en': 'Description',
+    },
+    'attachment_file_optional': {
+      'ku': 'فایلی هاوپێچ (ئارەزوومەندانە)',
+      'ar': 'ملف المرفق (اختياري)',
+      'en': 'Attachment File (Optional)',
+    },
+    'attach_file': {
+      'ku': 'هاوپێچکردنی فایل',
+      'ar': 'إرفاق ملف',
+      'en': 'Attach File',
+    },
+    'existing_attachment': {
+      'ku': 'فایلی هاوپێچی ئێستا',
+      'ar': 'المرفق الحالي',
+      'en': 'Existing Attachment',
+    },
+    'choose_date': {
+      'ku': 'دیاریکردنی بەروار',
+      'ar': 'اختر التاريخ',
+      'en': 'Choose Date',
+    },
+    'submit_assignment': {
+      'ku': 'ناردنی ئەرک',
+      'ar': 'إرسال الواجب',
+      'en': 'Submit Assignment',
+    },
+    'required': {
+      'ku': 'پێویستە پڕبکرێتەوە',
+      'ar': 'مطلوب',
+      'en': 'Required',
+    },
+    'no_homework_submissions_yet': {
+      'ku': 'هیچ ئەرکێک نەدۆزرایەوە.',
+      'ar': 'لا توجد واجبات منشورة بعد.',
+      'en': 'No homework submissions yet.',
+    },
+    'add_first_assignment': {
+      'ku': 'زیادکردنی یەکەم ئەرک',
+      'ar': 'إضافة أول واجب',
+      'en': 'Add First Assignment',
+    },
+    'save_changes': {
+      'ku': 'پاشکەوتکردنی گۆڕانکارییەکان',
+      'ar': 'حفظ التغييرات',
+      'en': 'Save Changes',
+    },
+    'change_date': {
+      'ku': 'گۆڕینی بەروار',
+      'ar': 'تغيير التاريخ',
+      'en': 'Change Date',
+    },
+    'rate': {
+      'ku': 'ڕێژە',
+      'ar': 'النسبة',
+      'en': 'Rate',
+    },
+    'total_students': {
+      'ku': 'کۆی قوتابییان',
+      'ar': 'إجمالي الطلاب',
+      'en': 'Total Students',
+    },
+    'no_students_found': {
+      'ku': 'هیچ قوتابییەک نەدۆزرایەوە بۆ بەشەکەت.',
+      'ar': 'لم يتم العثور على أي طلاب في قسمك.',
+      'en': 'No students found in your department.',
+    },
+    'department_video': {
+      'ku': 'ڤیدیۆی بەش',
+      'ar': 'فيديو القسم',
+      'en': 'Department Video',
+    },
+    'about_department': {
+      'ku': 'دەربارەی بەش',
+      'ar': 'حول القسم',
+      'en': 'About Department',
+    },
+    'department_gallery': {
+      'ku': 'وێنەکانی بەش',
+      'ar': 'معرض صور القسم',
+      'en': 'Department Gallery',
+    },
+    'photos': {
+      'ku': 'وێنە',
+      'ar': 'صور',
+      'en': 'Photos',
+    },
+    'role_fallback': {
+      'ku': 'پۆست',
+      'ar': 'المنصب',
+      'en': 'Role',
+    },
+    'department_fallback': {
+      'ku': 'بەش',
+      'ar': 'القسم',
+      'en': 'Department',
+    },
+    'copied_msg': {
+      'ku': 'کۆپی کرا',
+      'ar': 'تم النسخ',
+      'en': 'Copied',
+    },
+    'last_degree': {
+      'ku': 'دوا بڕوانامە',
+      'ar': 'آخر مؤهل علمي',
+      'en': 'Last Degree',
+    },
+    'mobile_number': {
+      'ku': 'ژمارەی مۆبایل',
+      'ar': 'رقم الهاتف',
+      'en': 'Mobile Number',
+    },
+    'personal_info': {
+      'ku': 'زانیاری کەسی',
+      'ar': 'المعلومات الشخصية',
+      'en': 'Personal Info',
+    },
+    'bio_about': {
+      'ku': 'دەربارەی',
+      'ar': 'السيرة الذاتية',
+      'en': 'About',
+    },
+    'academic_programs': {
+      'ku': 'پڕۆگرامەکان',
+      'ar': 'البرامج الأكاديمية',
+      'en': 'Programs',
+    },
+    'education_study': {
+      'ku': 'خوێندن',
+      'ar': 'الدراسة',
+      'en': 'Education',
+    },
+    'student_articles': {
+      'ku': 'بابەتی قوتابیان',
+      'ar': 'مقالات الطلاب',
+      'en': 'Student Articles',
+    },
+    'student_quotes': {
+      'ku': 'وتەی قوتابیان',
+      'ar': 'أقوال الطلاب',
+      'en': 'Student Quotes',
+    },
+    'student_articles_sub': {
+      'ku': 'سەرجەم وانە و پەرتووکەکانی بەشەکان بخوێنەوە',
+      'ar': 'اقرأ جميع الدروس والكتب الخاصة بالأقسام',
+      'en': 'Read all lessons and books of the departments',
+    },
+    'student_quotes_sub': {
+      'ku': 'ئەزموون و بیروڕای قوتابییە سەرکەوتووەکانمان',
+      'ar': 'تجارب وآراء طلابنا الناجحين',
+      'en': 'Experiences and opinions of our successful students',
+    },
+    'class_schedule': {
+      'ku': 'خشتەی وانەکان',
+      'ar': 'جدول الحصص',
+      'en': 'Class Schedule',
+    },
+    'class_schedule_sub': {
+      'ku': 'کاتی وانە و تاقیکردنەوەکان بە وردی',
+      'ar': 'أوقات الدروس والامتحانات بالتفصيل',
+      'en': 'Detailed schedules for classes and exams',
+    },
+    'students_page_title': {
+      'ku': 'پەڕەی\nقوتابیان',
+      'ar': 'صفحة\nالطلاب',
+      'en': 'Students\nPage',
+    },
+    'saved_news_title': {
+      'ku': 'هەواڵە پاشەکەوتکراوەکان',
+      'ar': 'الأخبار المحفوظة',
+      'en': 'Saved News',
+    },
+    'no_saved_news': {
+      'ku': 'هیچ هەواڵێک پاشەکەوت نەکراوە',
+      'ar': 'لا توجد أخبار محفوظة',
+      'en': 'No saved news',
+    },
+    'save_news_hint': {
+      'ku': 'هەواڵەکان پاشەکەوت بکە بۆ خوێندنەوەی دواتر',
+      'ar': 'احفظ الأخبار لقراءتها لاحقاً',
+      'en': 'Save articles to read them later',
     },
   };
 }

@@ -4,6 +4,7 @@ import 'package:sd_institute/theme/app_colors.dart';
 import 'package:sd_institute/screens/news_detail_screen.dart';
 import 'package:sd_institute/widgets/cached_image.dart';
 import 'package:sd_institute/widgets/clay_container.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class SavedNewsScreen extends StatelessWidget {
   final List<Map<String, dynamic>> savedItems;
@@ -12,8 +13,11 @@ class SavedNewsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+    final localizations = AppLocalizations.of(context);
+    final localeProvider = LocaleProviderInherited.of(context);
+
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: AppColors.bg(context),
         body: CustomScrollView(
@@ -41,7 +45,7 @@ class SavedNewsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'هەواڵە پاشەکەوتکراوەکان',
+                                localizations.get('saved_news_title'),
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,
@@ -50,7 +54,7 @@ class SavedNewsScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${savedItems.length} هەواڵ',
+                                '${savedItems.length} ${localizations.get('news')}',
                                 style: TextStyle(
                                   color: AppColors.textSec(context),
                                   fontSize: 12,
@@ -89,7 +93,7 @@ class SavedNewsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'هیچ هەواڵێک پاشەکەوت نەکراوە',
+                            localizations.get('no_saved_news'),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -98,7 +102,7 @@ class SavedNewsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'هەواڵەکان پاشەکەوت بکە بۆ خوێندنەوەی دواتر',
+                            localizations.get('save_news_hint'),
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.hint(context),

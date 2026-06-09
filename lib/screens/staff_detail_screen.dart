@@ -7,6 +7,7 @@ import 'package:sd_institute/services/staff_service.dart';
 import 'package:sd_institute/widgets/cached_image.dart';
 import 'package:sd_institute/widgets/clay_container.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sd_institute/utils/app_localizations.dart';
 
 class StaffDetailScreen extends StatefulWidget {
   final Map<String, String> staff;
@@ -42,9 +43,10 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     final staff = widget.staff;
     final isDark = AppColors.isDark(context);
     final size = MediaQuery.of(context).size;
+    final localeProvider = LocaleProviderInherited.of(context);
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: localeProvider.textDirection,
       child: Scaffold(
         backgroundColor: isDark
             ? const Color(0xFF000000)
@@ -404,18 +406,18 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                     context,
                     isDark,
                     Icons.phone_rounded,
-                    'پەیوەندی',
+                    'phone',
                     const Color(0xFF48C78E),
-                    staff['phone'] ?? '07504191546',
+                    staff['phone'] ?? '',
                   ),
                   const SizedBox(width: 12),
                   _actionBtn(
                     context,
                     isDark,
                     Icons.email_rounded,
-                    'ئیمەیڵ',
+                    'email',
                     const Color(0xFF5B8DEF),
-                    staff['email'] ?? 'ihsan@sd.edu.krd',
+                    staff['email'] ?? '',
                   ),
                 ],
               )
@@ -433,10 +435,14 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     BuildContext context,
     bool isDark,
     IconData icon,
-    String label,
+    String key,
     Color color,
     String value,
   ) {
+    final loc = AppLocalizations.of(context);
+    final label = loc.get(key);
+    final textDir = LocaleProviderInherited.of(context).textDirection;
+
     return Expanded(
       child: _InteractiveGlassWidget(
         isDark: isDark,
@@ -445,11 +451,11 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
           if (value.isNotEmpty) {
             bool launched = false;
             try {
-              if (label == 'پەیوەندی') {
+              if (key == 'phone') {
                 final cleaned = value.replaceAll(RegExp(r'[^0-9+]'), '');
                 await launchUrl(Uri.parse('tel:$cleaned'));
                 launched = true;
-              } else if (label == 'ئیمەیڵ') {
+              } else if (key == 'email') {
                 await launchUrl(Uri.parse('mailto:$value'));
                 launched = true;
               }
@@ -460,8 +466,8 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'کۆپی کرا: $value',
-                    textDirection: TextDirection.rtl,
+                    '${loc.get('copied_msg')}: $value',
+                    textDirection: textDir,
                   ),
                   backgroundColor: color,
                   behavior: SnackBarBehavior.floating,
@@ -506,36 +512,41 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     bool isDark,
     Map<String, String> staff,
   ) {
+    final loc = AppLocalizations.of(context);
     final items = [
       {
         'icon': Icons.school_rounded,
-        'label': 'دوا بڕوانامە',
-        'value': staff['degree'] ?? 'ماستەر لە زانستی کۆمپیوتەر',
+        'label': loc.get('last_degree'),
+        'value': staff['degree'] ?? '',
         'color': const Color(0xFF7C4DFF),
         'copyable': false,
       },
       {
         'icon': Icons.work_rounded,
-        'label': 'پسپۆڕی',
-        'value': staff['specialty'] ?? 'زانستی کۆمپیوتەر',
+        'label': loc.get('specialty'),
+        'value': staff['specialty'] ?? '',
         'color': const Color(0xFFE8985E),
         'copyable': false,
       },
       {
         'icon': Icons.phone_rounded,
-        'label': 'ژمارەی مۆبایل',
-        'value': staff['phone'] ?? '07504191546',
+        'label': loc.get('mobile_number'),
+        'value': staff['phone'] ?? '',
         'color': const Color(0xFF48C78E),
         'copyable': true,
       },
       {
         'icon': Icons.email_rounded,
-        'label': 'ئیمەیڵ',
-        'value': staff['email'] ?? 'ihsan@sd.edu.krd',
+        'label': loc.get('email'),
+        'value': staff['email'] ?? '',
         'color': const Color(0xFFFF6B6B),
         'copyable': true,
       },
     ];
+
+    final visibleItems = items.where((item) => (item['value'] as String).isNotEmpty).toList();
+
+    if (visibleItems.isEmpty) return const SizedBox.shrink();
 
     return _InteractiveGlassWidget(
           isDark: isDark,
@@ -547,12 +558,12 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                 _sectionTitle(
                   context,
                   isDark,
-                  'زانیاری کەسی',
+                  loc.get('personal_info'),
                   AppColors.accent,
                 ),
                 const SizedBox(height: 20),
-                ...List.generate(items.length, (i) {
-                  final item = items[i];
+                ...List.generate(visibleItems.length, (i) {
+                  final item = visibleItems[i];
                   final color = item['color'] as Color;
                   final copyable = item['copyable'] as bool;
 
@@ -568,8 +579,8 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'کۆپی کرا: ${item['value']}',
-                                      textDirection: TextDirection.rtl,
+                                      '${loc.get('copied_msg')}: ${item['value']}',
+                                      textDirection: LocaleProviderInherited.of(context).textDirection,
                                     ),
                                     backgroundColor: color,
                                     behavior: SnackBarBehavior.floating,
@@ -633,7 +644,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                           ],
                         ),
                       ),
-                      if (i < items.length - 1)
+                      if (i < visibleItems.length - 1)
                         Divider(
                           height: 32,
                           color: isDark
@@ -657,6 +668,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
     bool isDark,
     Map<String, String> staff,
   ) {
+    final loc = AppLocalizations.of(context);
     return _InteractiveGlassWidget(
           isDark: isDark,
           child: Padding(
@@ -664,12 +676,18 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle(context, isDark, 'دەربارەی', AppColors.secondary),
+                _sectionTitle(context, isDark, loc.get('bio_about'), AppColors.secondary),
                 const SizedBox(height: 16),
                 Text(
                   (staff['bio'] ?? '').isNotEmpty
                       ? staff['bio']!
-                      : '${staff['name'] ?? ''} مامۆستایەکی شارەزاو بەتەجربەیە لە بەشی ${staff['department'] ?? 'زانستی کۆمپیوتەر'} لە پەیمانگەی SD. بەرپرسیارە لە فێرکردنی قوتابییان و پەرەپێدانی بابەتەکانی ${staff['specialty'] ?? 'زانستی کۆمپیوتەر'}.',
+                      : (
+                          loc.locale == 'en'
+                            ? '${staff['name'] ?? ''} is an experienced and expert lecturer in the ${staff['department'] ?? 'Computer Science'} department at SD Institute, responsible for teaching students and developing curriculum.'
+                            : loc.locale == 'ar'
+                              ? '${staff['name'] ?? ''} هو مدرس ذو خبرة وكفاءة في قسم ${staff['department'] ?? 'علوم الحاسوب'} في معهد SD، وهو مسؤول عن تدريس الطلاب وتطوير المناهج.'
+                              : '${staff['name'] ?? ''} مامۆستایەکی شارەزاو بەتەجربەیە لە بەشی ${staff['department'] ?? 'زانستی کۆمپیوتەر'} لە پەیمانگەی SD. بەرپرسیارە لە فێرکردنی قوتابییان و پەرەپێدانی بابەتەکانی ${staff['specialty'] ?? 'زانستی کۆمپیوتەر'}.'
+                        ),
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.white70 : Colors.black87,
@@ -687,6 +705,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
   }
 
   Widget _buildInteractiveProgramsCard(BuildContext context, bool isDark) {
+    final loc = AppLocalizations.of(context);
     return _InteractiveGlassWidget(
           isDark: isDark,
           child: Padding(
@@ -697,7 +716,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                 _sectionTitle(
                   context,
                   isDark,
-                  'پڕۆگرامەکان',
+                  loc.get('academic_programs'),
                   AppColors.primary,
                 ),
                 const SizedBox(height: 20),
@@ -728,7 +747,7 @@ class _StaffDetailScreenState extends State<StaffDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  prog['program_type'] ?? 'خوێندن',
+                                  prog['program_type'] ?? loc.get('education_study'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isDark

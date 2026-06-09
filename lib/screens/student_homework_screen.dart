@@ -118,8 +118,8 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
           unselectedLabelColor: isDark ? Colors.white60 : Colors.black54,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           tabs: [
-            Tab(text: isRtl ? 'نوێیەکان' : 'Pending'),
-            Tab(text: isRtl ? 'نێردراوەکان' : 'Submitted'),
+            Tab(text: loc.get('pending')),
+            Tab(text: loc.get('submitted')),
           ],
         ),
       ),
@@ -144,7 +144,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _loadData,
-                            child: const Text('Try Again'),
+                            child: Text(loc.get('retry')),
                           ),
                         ],
                       ),
@@ -162,6 +162,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
   }
 
   Widget _buildHomeworkList(List<dynamic> list, bool isSubmittedTab, bool isDark, bool isRtl) {
+    final loc = AppLocalizations.of(context);
     if (list.isEmpty) {
       return Center(
         child: Column(
@@ -175,8 +176,8 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
             const SizedBox(height: 16),
             Text(
               isSubmittedTab
-                  ? (isRtl ? 'هیچ ئەرکێکی نێردراو نییە' : 'No submitted homeworks yet.')
-                  : (isRtl ? 'هیچ ئەرکێکی نوێ نییە' : 'No pending homeworks.'),
+                  ? loc.get('no_submitted_homeworks')
+                  : loc.get('no_pending_homeworks'),
               style: TextStyle(
                 color: isDark ? Colors.white54 : Colors.black54,
                 fontSize: 14,
@@ -200,6 +201,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
   }
 
   Widget _buildHomeworkCard(dynamic hw, bool isSubmittedTab, bool isDark, bool isRtl) {
+    final loc = AppLocalizations.of(context);
     final title = hw['title'] ?? hw['title_ku'] ?? hw['title_en'] ?? '';
     final desc = hw['description'] ?? hw['description_ku'] ?? hw['description_en'] ?? '';
     final filePath = hw['file_path'] as String?;
@@ -313,7 +315,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          isRtl ? 'نێردراوە' : 'Submitted',
+                          loc.get('submitted'),
                           style: const TextStyle(
                             color: Color(0xFF34C759),
                             fontWeight: FontWeight.bold,
@@ -329,7 +331,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          isRtl ? 'کاتی بەسەرچووە' : 'Overdue',
+                          loc.get('overdue'),
                           style: const TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
@@ -350,7 +352,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            isRtl ? 'کاتی کۆتایی نزیکە!' : 'Deadline Near!',
+                            loc.get('deadline_near'),
                             style: const TextStyle(
                               color: Colors.redAccent,
                               fontWeight: FontWeight.bold,
@@ -367,7 +369,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          isRtl ? 'چالاکە' : 'Active',
+                          loc.get('active'),
                           style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -413,7 +415,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           Icon(Icons.insert_drive_file_rounded, color: AppColors.primary, size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            isRtl ? 'بینینی فایلی هاوپێچ' : 'View Attachment',
+                            loc.get('view_attachment'),
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
@@ -445,7 +447,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          isRtl ? 'کاتی کۆتایی: ' : 'Due: ',
+                          loc.get('due'),
                           style: TextStyle(
                             color: isDark ? Colors.white54 : Colors.black54,
                             fontSize: 12,
@@ -472,7 +474,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                         },
                         icon: const Icon(Icons.done_all_rounded, size: 16, color: Color(0xFF34C759)),
                         label: Text(
-                          isRtl ? 'بینینی وەڵامەکەت' : 'View Submission',
+                          loc.get('view_submission'),
                           style: const TextStyle(
                             color: Color(0xFF34C759),
                             fontWeight: FontWeight.bold,
@@ -490,7 +492,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> with Sing
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
                         child: Text(
-                          isRtl ? 'ناردنی وەڵام' : 'Submit Answer',
+                          loc.get('submit_answer'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -552,11 +554,12 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
   }
 
   Future<void> _submitAnswer() async {
+    final loc = AppLocalizations.of(context);
     if (_selectedFile == null || _selectedFile!.path == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a file to submit.'),
-          backgroundColor: Color(0xFFFF3B30),
+        SnackBar(
+          content: Text(loc.get('please_select_file')),
+          backgroundColor: const Color(0xFFFF3B30),
         ),
       );
       return;
@@ -597,9 +600,9 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Answer submitted successfully!'),
-          backgroundColor: Color(0xFF34C759),
+        SnackBar(
+          content: Text(loc.get('answer_submitted_success')),
+          backgroundColor: const Color(0xFF34C759),
         ),
       );
     } catch (e) {
@@ -619,6 +622,7 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final title = widget.homework['title'] ?? widget.homework['title_ku'] ?? widget.homework['title_en'] ?? '';
+    final loc = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -642,9 +646,9 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Submit Your Homework',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                Text(
+                  loc.get('submit_your_homework'),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -664,7 +668,7 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
             const SizedBox(height: 20),
             
             Text(
-              'Select Answer File (PDF, DOCX, Images, etc.)',
+              loc.get('select_answer_file'),
               style: TextStyle(
                 color: isDark ? Colors.white60 : Colors.black54,
                 fontSize: 12,
@@ -676,7 +680,7 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
                 ? OutlinedButton.icon(
                     onPressed: _pickFile,
                     icon: const Icon(Icons.cloud_upload_rounded),
-                    label: const Text('Choose File'),
+                    label: Text(loc.get('choose_file')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary),
@@ -736,9 +740,9 @@ class _SubmitAnswerSheetState extends State<_SubmitAnswerSheet> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text(
-                        'Upload & Submit',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    : Text(
+                        loc.get('upload_and_submit'),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
               ),
             ),

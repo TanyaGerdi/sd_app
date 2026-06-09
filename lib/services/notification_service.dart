@@ -199,26 +199,32 @@ class NotificationService {
   /// Save the device token to Laravel API
   static Future<void> registerToken(String token, String platform) async {
     try {
-      final studentId = AuthService.getStudentId();
+      final isTeacher = AuthService.isTeacher();
+      final userId = AuthService.getStudentId();
       final response = await ApiService.getRaw('/device_tokens', queryParams: {
         'token': token,
         'single': '1',
       });
       final existing = response['data'];
+
+      final Map<String, dynamic> tokenData = {
+        'token': token,
+        'platform': platform,
+      };
+      if (isTeacher) {
+        tokenData['teacher_id'] = userId;
+        tokenData['student_id'] = null;
+      } else {
+        tokenData['student_id'] = userId;
+        tokenData['teacher_id'] = null;
+      }
+
       if (existing == null) {
-        await ApiService.post('/device_tokens', data: {
-          'token': token,
-          'platform': platform,
-          'student_id': studentId,
-        });
+        await ApiService.post('/device_tokens', data: tokenData);
         debugPrint('FCM Token registered successfully in Laravel API: $token');
       } else {
         final id = existing['id'];
-        await ApiService.put('/device_tokens/$id', data: {
-          'token': token,
-          'platform': platform,
-          'student_id': studentId,
-        });
+        await ApiService.put('/device_tokens/$id', data: tokenData);
         debugPrint('FCM Token updated successfully in Laravel API');
       }
     } catch (e) {
