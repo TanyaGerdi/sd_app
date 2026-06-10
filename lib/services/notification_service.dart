@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sd_institute/services/api_service.dart';
 import 'package:sd_institute/services/post_service.dart';
 import 'package:sd_institute/screens/news_detail_screen.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 /// Central hub for all notification logic:
 ///  - Local popup display (foreground FCM)
@@ -53,6 +56,17 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     hasUnreadNotifier.value =
         prefs.getBool('has_unread_notifications') ?? false;
+
+    // Initialize timezone support
+    tz.initializeTimeZones();
+    try {
+      final String timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      debugPrint('[NotificationService] Timezone set to: $timeZoneName');
+    } catch (e) {
+      debugPrint('[NotificationService] Failed to set local timezone, defaulting to UTC: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
 
     const androidSettings = AndroidInitializationSettings(
       _androidNotificationIcon,
@@ -315,6 +329,60 @@ class NotificationService {
       payload: payload,
     );
     await _setHasUnread(true);
+  }
+
+  /// Cancel a specific notification by ID
+  static Future<void> cancelNotification(int id) async {
+    await _localPlugin.cancel(id);
+  }
+
+  /// Schedule a weekly repeating local notification
+  static Future<void> scheduleWeeklyNotification({
+    required int id,
+    required String title,
+    required String body,
+    required int weekday,
+    required int hour,
+    required int minute,
+  }) async {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+
+    while (scheduledDate.isBefore(now) || scheduledDate.weekday != weekday) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      _channel.id,
+      _channel.name,
+      channelDescription: _channel.description,
+      importance: Importance.max,
+      priority: Priority.max,
+      icon: _androidNotificationIcon,
+      color: const Color(0xFF282061),
+      styleInformation: BigTextStyleInformation(body),
+      ticker: title,
+      visibility: NotificationVisibility.public,
+      category: AndroidNotificationCategory.message,
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.timeSensitive,
+    );
+
+    await _localPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      NotificationDetails(android: androidDetails, iOS: iosDetails),
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
   }
 }
 

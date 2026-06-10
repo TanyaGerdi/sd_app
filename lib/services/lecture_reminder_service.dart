@@ -1,47 +1,61 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sd_institute/services/api_service.dart';
 import 'package:sd_institute/services/auth_service.dart';
 import 'package:sd_institute/services/notification_service.dart';
 
-/// Service that checks the teacher's schedule and triggers a local notification
-/// 5 minutes before a class starts.
+/// Service that checks the teacher's schedule and schedules weekly local notifications
+/// 5 minutes before each class starts.
 ///
 /// Flow:
-///   1. When a teacher logs in, call [start()] to fetch their schedule and
-///      begin a periodic timer (runs every 60 seconds).
-///   2. Each tick, the timer compares the current day/time against the
-///      stored lecture list.  If a lecture starts in exactly 5 minutes,
-///      it fires a local push notification.
-///   3. Call [stop()] on logout to cancel the timer.
+///   1. When a teacher logs in or the app starts, call [start()] to fetch their schedule and
+///      schedule weekly local notifications using native OS alarms.
+///   2. The OS will fire the notifications at the correct times, even if the app is closed or in the background.
+///   3. Periodically re-syncs the schedule hourly to capture any dashboard changes.
+///   4. Call [stop()] on logout to cancel all scheduled notifications.
 class LectureReminderService {
   static Timer? _timer;
   static List<Map<String, dynamic>> _lectures = [];
-  static final Set<String> _notifiedKeys = {}; // prevent duplicate alerts
 
-  /// Start polling.  Safe to call multiple times — it cancels the old timer.
+  /// Start scheduling. Safe to call multiple times.
   static Future<void> start() async {
-    stop(); // cancel any old timer
+    await stop(); // cancel any old timer and reminders
 
     if (!AuthService.isTeacher()) return;
 
     await _fetchLectures();
+    await scheduleReminders();
 
-    // Tick once immediately, then every 60 seconds
-    _checkAndNotify();
-    _timer = Timer.periodic(const Duration(seconds: 60), (_) {
-      _checkAndNotify();
+    // Re-sync and reschedule hourly to handle admin modifications
+    _timer = Timer.periodic(const Duration(hours: 1), (_) async {
+      await _fetchLectures();
+      await scheduleReminders();
     });
 
-    debugPrint('[LectureReminder] Started — ${_lectures.length} lectures loaded');
+    debugPrint('[LectureReminder] Started — ${_lectures.length} lectures loaded and scheduled');
   }
 
-  /// Stop polling
-  static void stop() {
+  /// Stop and cancel all scheduled reminders
+  static Future<void> stop() async {
     _timer?.cancel();
     _timer = null;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> oldIdsStr = prefs.getStringList('scheduled_lecture_notification_ids') ?? [];
+      for (final idStr in oldIdsStr) {
+        final id = int.tryParse(idStr);
+        if (id != null) {
+          await NotificationService.cancelNotification(id);
+        }
+      }
+      await prefs.remove('scheduled_lecture_notification_ids');
+    } catch (e) {
+      debugPrint('[LectureReminder] Failed to cancel reminders on stop: $e');
+    }
+
     _lectures = [];
-    _notifiedKeys.clear();
     debugPrint('[LectureReminder] Stopped');
   }
 
@@ -71,69 +85,97 @@ class LectureReminderService {
     }
   }
 
-  /// Compare current time against the lecture list
-  static void _checkAndNotify() {
+  /// Schedule OS-level repeating notifications for the lectures
+  static Future<void> scheduleReminders() async {
     if (_lectures.isEmpty) return;
 
-    final now = DateTime.now();
-    final currentDay = _dayName(now.weekday); // e.g. "Sunday"
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    for (final lecture in _lectures) {
-      final lectureDay = lecture['day_of_week']?.toString();
-      final startTimeStr = lecture['start_time']?.toString(); // "HH:mm:ss"
-      if (lectureDay == null || startTimeStr == null) continue;
+      // 1. Cancel previously scheduled reminders
+      final List<String> oldIdsStr = prefs.getStringList('scheduled_lecture_notification_ids') ?? [];
+      for (final idStr in oldIdsStr) {
+        final id = int.tryParse(idStr);
+        if (id != null) {
+          await NotificationService.cancelNotification(id);
+        }
+      }
 
-      if (lectureDay != currentDay) continue;
+      // 2. Schedule new reminders
+      final List<String> newIdsStr = [];
+      for (final lecture in _lectures) {
+        final id = int.tryParse(lecture['id']?.toString() ?? '');
+        if (id == null) continue;
 
-      // Parse start_time
-      final parts = startTimeStr.split(':');
-      if (parts.length < 2) continue;
-      final lectureHour = int.tryParse(parts[0]) ?? -1;
-      final lectureMinute = int.tryParse(parts[1]) ?? -1;
-      if (lectureHour < 0 || lectureMinute < 0) continue;
+        final lectureDay = lecture['day_of_week']?.toString();
+        final startTimeStr = lecture['start_time']?.toString(); // "HH:mm:ss"
+        if (lectureDay == null || startTimeStr == null) continue;
 
-      final lectureTime = DateTime(
-        now.year, now.month, now.day, lectureHour, lectureMinute,
-      );
-      final diff = lectureTime.difference(now).inMinutes;
+        // Parse start_time
+        final parts = startTimeStr.split(':');
+        if (parts.length < 2) continue;
+        final lectureHour = int.tryParse(parts[0]) ?? -1;
+        final lectureMinute = int.tryParse(parts[1]) ?? -1;
+        if (lectureHour < 0 || lectureMinute < 0) continue;
 
-      // Fire when between 4-5 minutes away (the 60-second window)
-      if (diff >= 4 && diff <= 5) {
-        final key = '${lecture['id']}_${now.year}${now.month}${now.day}';
-        if (_notifiedKeys.contains(key)) continue; // already notified today
-        _notifiedKeys.add(key);
+        // Calculate time 5 minutes before class starts
+        int reminderHour = lectureHour;
+        int reminderMinute = lectureMinute - 5;
+        if (reminderMinute < 0) {
+          reminderMinute += 60;
+          reminderHour -= 1;
+          if (reminderHour < 0) {
+            reminderHour += 24;
+          }
+        }
+
+        final weekday = _dayToWeekday(lectureDay);
+        // If we rolled back the hour past midnight, adjust the weekday
+        int reminderWeekday = weekday;
+        if (lectureHour == 0 && lectureMinute < 5) {
+          reminderWeekday = weekday - 1;
+          if (reminderWeekday < DateTime.monday) {
+            reminderWeekday = DateTime.sunday;
+          }
+        }
 
         final subject = lecture['subject'] ?? '';
         final classroom = lecture['classroom'] ?? '';
 
         final title = 'کاتی وانەکەت نزیک بووەتەوە';
-        final body =
-            'ئاگاداربە! وانەی ($subject) لە ($classroom) دەستپێدەکات لە ماوەی ٥ خولەکی داهاتوودا.';
+        final body = 'ئاگاداربە! وانەی ($subject) لە ($classroom) دەستپێدەکات لە ماوەی ٥ خولەکی داهاتوودا.';
 
-        NotificationService.showForegroundNotification(
+        await NotificationService.scheduleWeeklyNotification(
+          id: id,
           title: title,
           body: body,
+          weekday: reminderWeekday,
+          hour: reminderHour,
+          minute: reminderMinute,
         );
-        NotificationService.showSystemNotification(title: title, body: body);
 
-        debugPrint('[LectureReminder] Notified: $subject @ $classroom');
+        newIdsStr.add(id.toString());
       }
+
+      // 3. Save new IDs to prefs
+      await prefs.setStringList('scheduled_lecture_notification_ids', newIdsStr);
+      debugPrint('[LectureReminder] Scheduled ${newIdsStr.length} notifications');
+    } catch (e) {
+      debugPrint('[LectureReminder] Failed to schedule reminders: $e');
     }
   }
 
-  /// Convert Dart weekday (1=Monday … 7=Sunday) to the English day name
-  /// stored in the DB.
-  static String _dayName(int weekday) {
-    const days = [
-      '', // 0 unused
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    return days[weekday];
+  /// Convert day name to DateTime weekday integer
+  static int _dayToWeekday(String dayName) {
+    switch (dayName.toLowerCase()) {
+      case 'monday': return DateTime.monday;
+      case 'tuesday': return DateTime.tuesday;
+      case 'wednesday': return DateTime.wednesday;
+      case 'thursday': return DateTime.thursday;
+      case 'friday': return DateTime.friday;
+      case 'saturday': return DateTime.saturday;
+      case 'sunday': return DateTime.sunday;
+      default: return DateTime.monday;
+    }
   }
 }
